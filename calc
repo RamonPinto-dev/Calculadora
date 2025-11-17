@@ -1,1 +1,134 @@
 
+import math
+
+print("==CALCULADORA CIENTIFICA==")
+print("==TRABALHO DO LINDO WELLIGTON==")
+print('Digite "=" para encerrar.')
+
+while True:
+    entrada = input("\nDigite o número: ")
+
+    if entrada == "=":
+        print("Saindo...")
+        break
+
+    try:
+        resultado = float(entrada)
+    except ValueError:
+        print("Erro: valor inválido!")
+        continue
+
+    print("""
+Qual sua operação?
+
+1  - Somar 
+2  - Subtrair 
+3  - Multiplicar 
+4  - Dividir
+5  - Potência 
+6  - Raiz quadrada
+7  - Logaritmo natural (ln)
+8  - Logaritmo base 10
+9  - Seno (graus)
+10 - Cosseno (graus)
+11 - Tangente (graus)
+12 - Fatorial
+""")
+
+    operacao = input("Escolha a opção: ")
+
+    match operacao:
+
+        case "1":  
+            while True:
+                n = input("Digite um número para somar (ou '=' para parar): ")
+                if n == "=":
+                    break
+                try:
+                    resultado += float(n)
+                except ValueError:
+                    print("Erro: número inválido!")
+            print("Resultado final:", resultado)
+
+        case "2":  
+            while True:
+                n = input("Digite um número para subtrair (ou '=' para parar): ")
+                if n == "=":
+                    break
+                try:
+                    resultado -= float(n)
+                except ValueError:
+                    print("Erro: número inválido!")
+            print("Resultado final:", resultado)
+
+        case "3":  
+            while True:
+                n = input("Digite um número para multiplicar (ou '=' para parar): ")
+                if n == "=":
+                    break
+                try:
+                    resultado *= float(n)
+                except ValueError:
+                    print("Erro: número inválido!")
+            print("Resultado final:", resultado)
+
+        case "4":  
+            while True:
+                n = input("Digite um número para dividir (ou '=' para parar): ")
+                if n == "=":
+                    break
+                try:
+                    divisor = float(n)
+                    if divisor == 0:
+                        print("Não é possível dividir por zero.")
+                        continue
+                    resultado /= divisor
+                except ValueError:
+                    print("Erro: número inválido!")
+            print("Resultado final:", resultado)
+
+        case "5":  
+            expo = input("Digite o expoente: ")
+            try:
+                expo = float(expo)
+                resultado = resultado ** expo
+                print("Resultado:", resultado)
+            except ValueError:
+                print("Erro: número inválido!")
+
+        case "6":  
+            if resultado < 0:
+                print("Erro: raiz de número negativo!")
+            else:
+                print("Resultado:", math.sqrt(resultado))
+
+        case "7":  
+            if resultado <= 0:
+                print("Erro: ln número tem quer ser > 0")
+            else:
+                print("Resultado:", math.log(resultado))
+
+        case "8":  
+            if resultado <= 0:
+                print("Erro: log10 número tem que ser > 0")
+            else:
+                print("Resultado:", math.log10(resultado))
+
+        case "9":  
+            print("Resultado:", math.sin(math.radians(resultado)))
+
+        case "10":  
+            print("Resultado:", math.cos(math.radians(resultado)))
+
+        case "11":  
+            print("Resultado:", math.tan(math.radians(resultado)))
+
+        case "12":  
+            if resultado < 0 or not resultado.is_integer():
+                print("Erro: número inteiro que seja >= 0")
+            else:
+                print("Resultado:", math.factorial(int(resultado)))
+
+        case _:
+            print("Erro")
+    
