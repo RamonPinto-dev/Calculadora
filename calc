@@ -24,8 +24,8 @@ Qual sua operação?
 4  - Dividir
 5  - Potência 
 6  - Raiz quadrada
-7  - Logaritmo natural (ln)
-8  - Logaritmo base 10
+7  - Logaritmo
+8  - Logaritmo10
 9  - Seno (graus)
 10 - Cosseno (graus)
 11 - Tangente (graus)
@@ -35,6 +35,7 @@ Qual sua operação?
     operacao = input("Escolha a opção: ")
 
     match operacao:
+
 
         case "1":  
             while True:
@@ -102,8 +103,7 @@ Qual sua operação?
                     r = 0.5 * (r + x / r)
                 return r
 
-            r = raiz(resultado)
-            print("Resultado:", r)
+            print("Resultado:", raiz(resultado))
 
         case "7":  
             def exp(x):
@@ -124,11 +124,30 @@ Qual sua operação?
 
             print("Resultado:", ln(resultado))
 
-        case "8":  
-            if resultado <= 0:
-                print("Erro: log10 número tem que ser > 0")
-            else:
-                print("Resultado:", math.log10(resultado))
+        case "8":
+            def exp(x):
+                soma = 1
+                term = 1
+                for i in range(1, 20):
+                    term *= x / i
+                    soma += term
+                return soma
+
+            def ln(y):
+                if y <= 0:
+                    return None
+                x = y - 1
+                for _ in range(20):
+                    x -= (exp(x) - y) / exp(x)
+                return x
+
+            def log10(x):
+                L = ln(x)
+                if L is None:
+                    return None
+                return L / 2.302585092994
+
+            print("Resultado:", log10(resultado))
 
         case "9":
             def seno(g):
@@ -179,12 +198,10 @@ Qual sua operação?
             else:
                 print("Resultado:", seno(resultado) / c)
 
-        case "12":  
-            if resultado < 0 or not resultado.is_integer():
-                print("Erro: número inteiro que seja >= 0")
-            else:
-                print("Resultado:", math.factorial(int(resultado)))
-
+        case "12":
+                fatorial
+            
+        
         case "13":
             n = input("Digite a porcentagem (%): ")
             try:
