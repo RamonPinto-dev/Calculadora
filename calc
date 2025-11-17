@@ -1,6 +1,5 @@
 print("==CALCULADORA CIENTIFICA==")
 print("==TRABALHO DO LINDO WELLIGTON==")
-print('Digite "=" para encerrar.')
 def parse_complex(s):
     s = s.strip()
     if s.startswith('(') and s.endswith(')'):
