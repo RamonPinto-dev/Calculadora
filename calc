@@ -63,7 +63,7 @@ def format_complex(c):
 
 class Node:
     def __init__(self, type, value=None, left=None, right=None):
-        self.type = type  # 'number' ou 'op'
+        self.type = type 
         self.value = value
         self.left = left
         self.right = right
