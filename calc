@@ -1,6 +1,3 @@
-
-import math
-
 print("==CALCULADORA CIENTIFICA==")
 print("==TRABALHO DO LINDO WELLIGTON==")
 print('Digite "=" para encerrar.')
@@ -48,7 +45,7 @@ Qual sua operação?
                     resultado += float(n)
                 except ValueError:
                     print("Erro: número inválido!")
-            print("Resultado final:", resultado)
+            print("Resultado:", resultado)
 
         case "2":  
             while True:
@@ -59,7 +56,7 @@ Qual sua operação?
                     resultado -= float(n)
                 except ValueError:
                     print("Erro: número inválido!")
-            print("Resultado final:", resultado)
+            print("Resultado:", resultado)
 
         case "3":  
             while True:
@@ -70,7 +67,7 @@ Qual sua operação?
                     resultado *= float(n)
                 except ValueError:
                     print("Erro: número inválido!")
-            print("Resultado final:", resultado)
+            print("Resultado:", resultado)
 
         case "4":  
             while True:
@@ -85,7 +82,7 @@ Qual sua operação?
                     resultado /= divisor
                 except ValueError:
                     print("Erro: número inválido!")
-            print("Resultado final:", resultado)
+            print("Resultado:", resultado)
 
         case "5":  
             expo = input("Digite o expoente: ")
@@ -97,10 +94,16 @@ Qual sua operação?
                 print("Erro: número inválido!")
 
         case "6":  
-            if resultado < 0:
-                print("Erro: raiz de número negativo!")
-            else:
-                print("Resultado:", math.sqrt(resultado))
+            def raiz(x):
+                if x < 0:
+                    return None
+                r = x
+                for _ in range(20):
+                    r = 0.5 * (r + x / r)
+                return r
+
+            r = raiz(resultado)
+            print("Resultado:", r)
 
         case "7":  
             if resultado <= 0:
@@ -131,4 +134,3 @@ Qual sua operação?
 
         case _:
             print("Erro")
-    
