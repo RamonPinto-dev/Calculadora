@@ -132,5 +132,14 @@ Qual sua operação?
             else:
                 print("Resultado:", math.factorial(int(resultado)))
 
+        case "13":
+            n = input("Digite a porcentagem (%): ")
+            try:
+                n = float(n)
+                resultado = resultado * (n / 100)
+                print("Resultado:", resultado)
+            except ValueError:
+                print("Erro: número inválido!")
+
         case _:
             print("Erro")
