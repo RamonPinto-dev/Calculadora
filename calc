@@ -30,6 +30,7 @@ Qual sua operação?
 10 - Cosseno (graus)
 11 - Tangente (graus)
 12 - Fatorial
+13 - Porcentagem
 """)
 
     operacao = input("Escolha a opção: ")
