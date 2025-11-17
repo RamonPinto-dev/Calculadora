@@ -63,7 +63,7 @@ def format_complex(c):
 
 class Node:
     def __init__(self, type, value=None, left=None, right=None):
-        self.type = type 
+        self.type = type  
         self.value = value
         self.left = left
         self.right = right
@@ -124,7 +124,6 @@ def parse_expression(expr):
                 raise ValueError("Parêntese não fechado")
             return node
         else:
-            # Parse número complexo simples ou i
             num_str = ''
             if tokens and tokens[0] in ['+', '-']:
                 num_str = tokens.pop(0)
@@ -338,7 +337,7 @@ Qual sua operação?
 
         case "8":
             if resultado.imag != 0 or resultado.real < 0 or resultado.real != int(resultado.real):
-                print("Fatorial definido apenas para inteiros não negativos reais.")
+                print("Fatorial funciona para inteiro positivo e real.")
             else:
                 def fatorial(n):
                     if n == 0 or n == 1:
