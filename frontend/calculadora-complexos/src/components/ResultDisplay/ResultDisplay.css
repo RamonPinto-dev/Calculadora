@@ -1,0 +1,148 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+
+.result-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+
+    width: 100%;
+    box-sizing: border-box;
+
+    min-width: 0;
+    min-inline-size: 0;
+
+
+    overflow: visible;
+}
+
+
+.result-container span {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #000000;
+}
+
+
+.notation-lisp {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 12px 16px;
+    border-radius: 18px;
+
+    background: linear-gradient(135deg, #000000 0%, #001900 35%, #003300 100%);
+    border: 2px solid rgba(0, 255, 80, 0.7);
+    color: #00ff55;
+    font-family: "Consolas", "Courier New", monospace;
+    letter-spacing: 1px;
+    font-size: 1rem;
+
+
+
+
+    overflow-x: auto;
+    overflow-y: hidden;
+    min-height: 45px;
+
+    min-width: 0;
+    min-inline-size: 0;
+
+    -webkit-overflow-scrolling: touch;
+}
+
+
+.notation-lisp h3,
+.notation-lisp span,
+.notation-lisp p {
+    display: inline;
+
+    margin: 0;
+    padding: 0;
+    white-space: nowrap;
+}
+
+
+.notation-lisp::-webkit-scrollbar {
+    height: 8px;
+}
+
+.notation-lisp::-webkit-scrollbar-track {
+    background: #001900;
+    border-radius: 8px;
+}
+
+.notation-lisp::-webkit-scrollbar-thumb {
+    background: #00ff55;
+    border-radius: 8px;
+    box-shadow: 0 0 6px #00ff55;
+}
+
+.notation-lisp {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    scrollbar-width: thin;
+    scrollbar-color: #00ff55 #001900;
+}
+
+@media (max-width: 950px) {
+    .calculator-container {
+        gap: 1rem;
+    }
+
+
+    .calc-result-info {
+        flex: 0 1 100%;
+        max-width: 100%;
+        min-width: 20%;
+        overflow: visible;
+    }
+
+    .result-container {
+        width: 100%;
+    }
+}
+
+
+.buttons-result-container {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    width: 95%;
+    margin-top: 8px;
+}
+
+.buttons-result-container button {
+    padding: 8px 14px;
+    border-radius: 10px;
+    width: 80%;
+    background: linear-gradient(to bottom, #171717, #242424);
+    color: #fff;
+    border: 1px solid #292929;
+    cursor: pointer;
+}
+
+
+@media (max-width: 900px) {
+    .result-container {
+        width: 100%;
+        flex-basis: auto;
+        min-width: 0;
+    }
+
+    .buttons-result-container {
+        gap: 0.6rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
