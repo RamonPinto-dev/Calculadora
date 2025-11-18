@@ -169,11 +169,6 @@ def trees_equal(n1, n2):
 
 while True:
     entrada = input("\nDigite o número (feito até %): ")
-
-    if entrada == "=":
-        print("Saindo...")
-        break
-
     try:
         if "i" not in entrada:
             resultado = float(entrada)
