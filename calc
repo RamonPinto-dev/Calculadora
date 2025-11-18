@@ -61,11 +61,11 @@ def format_complex(c):
         return f"({a}{sign}{b_str}i)"
 
 class Node:
-    def __init__(self, type, value=None, left=None, right=None):
+    def __init__(self, type, value=None, esquerda=None, direita=None):
         self.type = type  
         self.value = value
-        self.left = left
-        self.right = right
+        self.esquerda = esquerda
+        self.direita = direita
 
 def tokenize(expr):
     tokens = []
@@ -93,26 +93,26 @@ def tokenize(expr):
 def parse_expression(expr):
     tokens = tokenize(expr)
     def expr():
-        left = term()
+        esquerda = term()
         while tokens and tokens[0] in ['+', '-']:
             op = tokens.pop(0)
-            right = term()
-            left = Node('op', op, left, right)
-        return left
+            direita = term()
+            esquerda = Node('op', op, esquerda, direita)
+        return esquerda
     def term():
-        left = power()
+        esquerda = power()
         while tokens and tokens[0] in ['*', '/']:
             op = tokens.pop(0)
-            right = power()
-            left = Node('op', op, left, right)
-        return left
+            direita = power()
+            esquerda = Node('op', op, esquerda, direita)
+        return esquerda
     def power():
-        left = factor()
+        esquerda = factor()
         if tokens and tokens[0] == '^':
             tokens.pop(0)
-            right = power()
-            left = Node('op', '^', left, right)
-        return left
+            direita = power()
+            esquerda = Node('op', '^', esquerda, direita)
+        return esquerda
     def factor():
         if tokens[0] == '(':
             tokens.pop(0)
@@ -142,30 +142,25 @@ def evaluate(node):
     if node.type == 'number':
         return node.value
     elif node.type == 'op':
-        left = evaluate(node.left)
-        right = evaluate(node.right)
-        if node.value == '+':
-            return left + right
-        elif node.value == '-':
-            return left - right
-        elif node.value == '*':
-            return left * right
-        elif node.value == '/':
-            if right == 0:
-                raise ValueError("Divisão por zero")
-            return left / right
-        elif node.value == '^':
-            return left ** right
+        left = evaluate(node.esquerda)
+        right = evaluate(node.direita)
+        ops = {
+            '+': lambda a, b: a + b,
+            '-': lambda a, b: a - b,
+            '*': lambda a, b: a * b,
+            '/': lambda a, b: a / b if b != 0 else (_ for _ in ()).throw(ValueError("Divisão por zero")),
+            '^': lambda a, b: a ** b
+        }
+        return ops[node.value](left, right)
 
 def trees_equal(n1, n2):
     if n1.type != n2.type:
         return False
     if n1.type == 'number':
         return n1.value == n2.value
-    elif n1.type == 'op':
-        return (n1.value == n2.value and 
-                trees_equal(n1.left, n2.left) and 
-                trees_equal(n1.right, n2.right))
+    return (n1.value == n2.value and 
+            trees_equal(n1.esquerda, n2.esquerda) and 
+            trees_equal(n1.direita, n2.direita))
 
 while True:
     entrada = input("\nDigite o número (feito até %): ")
