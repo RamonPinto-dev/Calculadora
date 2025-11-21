@@ -128,7 +128,7 @@ def tokenize(expr):
 
                 continue
 
-            raise ValueError(f"Caractere inválido: {expr[i]}")
+            raise ValueError(f"Invalido: {expr[i]}")
 
     return tokens
 
