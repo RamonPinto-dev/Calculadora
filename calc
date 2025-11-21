@@ -133,7 +133,7 @@ def tokenize(expr):
     return tokens
 
 
-def parse_expression(expr):
+def calccomparse(expr):
     tokens = tokenize(expr)
 
     def parse_expr():
@@ -249,15 +249,15 @@ while True:
         case "2":
             expr = input("Digite expressão: ")
             try:
-                t = parse_expression(expr)
+                t = calccomparse(expr)
                 print("Resultado:", format_complex(evaluate(t)))
             except Exception as e:
                 print("Erro:", e)
 
         case "3":
             try:
-                e1 = parse_expression(input("Calc 1: "))
-                e2 = parse_expression(input("Calc 2: "))
+                e1 = calccomparse(input("Calc 1: "))
+                e2 = calccomparse(input("Calc 2: "))
                 print("Iguais" if igual(e1, e2) else "São diferente")
             except Exception as e:
                 print("Erro:", e)
