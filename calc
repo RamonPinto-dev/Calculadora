@@ -215,14 +215,14 @@ def evaluate(node):
     return operacoes[node.valor](esquerda, direita)
 
 
-def trees_equal(a, b):
+def igual(a, b):
     if a.tipo != b.tipo:
         return False
     if a.tipo == "num":
         return a.valor == b.valor
     return (a.valor == b.valor and
-            trees_equal(a.esq, b.esq) and
-            trees_equal(a.dir, b.dir))
+            igual(a.esq, b.esq) and
+            igual(a.dir, b.dir))
 
 
 while True:
@@ -258,7 +258,7 @@ while True:
             try:
                 e1 = parse_expression(input("Calc 1: "))
                 e2 = parse_expression(input("Calc 2: "))
-                print("Iguais" if trees_equal(e1, e2) else "São diferente")
+                print("Iguais" if igual(e1, e2) else "São diferente")
             except Exception as e:
                 print("Erro:", e)
 
