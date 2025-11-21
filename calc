@@ -1,372 +1,266 @@
-print("==CALCULADORA CIENTIFICA==")
-print("==TRABALHO DO LINDO WELLIGTON==")
+print("== CALCULADORA CIENTÍFICA ==")
+print("== TRABALHO DO LINDO WELLIGTON ==")
+
+PI = 3.14
+
+def seno(g):
+    rad = g * PI / 180
+    s = 0
+    term = rad
+    for i in range(1, 10):
+        s += term
+        term *= -(rad * rad) / ((2 * i) * (2 * i + 1))
+    return s
+
+def cos(g):
+    rad = g * PI / 180
+    c = 1
+    term = 1
+    for i in range(1, 10):
+        term *= -(rad * rad) / ((2 * i - 1) * (2 * i))
+        c += term
+    return c
+
+
+def tan(g):
+    c = cos(g)
+    if abs(c) < 1e-12:
+        raise ValueError("Erro na tangente")
+    return seno(g) / c
+
+
+def exp(x):
+    soma = 1
+    term = 1
+    for i in range(1, 20):
+        term *= x / i
+        soma += term
+    return soma
+
+def ln(y):
+    if y == 0:
+        raise ValueError("ln não funciona em zero")
+    x = y - 1
+    for _ in range(20):
+        x -= (exp(x) - y) / exp(x)
+    return x
+
+def log10(x):
+    return ln(x) / 2.302585092994
+
+def sqrt(x):
+    return x ** 0.5
+
+def reduzir(x):
+    return f"{x:.3f}".rstrip("0").rstrip(".")
+
+
 def parse_complex(s):
     s = s.strip()
-    if s.startswith('(') and s.endswith(')'):
-        inside = s[1:-1].strip()
-        parts = inside.replace(' ', '').split('+')
-        if len(parts) == 2:
-            a_str, b_str = parts
-            if b_str.endswith('i'):
-                b_str = b_str[:-1]
-                if not b_str:
-                    b = 1
-                else:
-                    b = float(b_str)
-                a = float(a_str)
-                return complex(a, b)
-        parts = inside.replace(' ', '').split('-')
-        if len(parts) == 2:
-            a_str, b_str = parts
-            if b_str.endswith('i'):
-                b_str = b_str[:-1]
-                if not b_str:
-                    b = 1
-                else:
-                    b = float(b_str)
-                a = float(a_str)
-                return complex(a, -b)
-    else:
-        if s.endswith('i'):
-            if s == 'i':
-                return complex(0, 1)
-            elif s == '-i':
-                return complex(0, -1)
-            else:
-                b_str = s[:-1]
-                b = float(b_str)
-                return complex(0, b)
-        else:
-            return complex(float(s), 0)
-    raise ValueError("Formato de número complexo inválido")
+
+    if s.endswith("i"):
+        base = s[:-1]
+        if base == "" or base == "+":
+            return complex(0, 1)
+        if base == "-":
+            return complex(0, -1)
+        return complex(0, float(base))
+
+    return complex(float(s), 0)
 
 def format_complex(c):
-    a, b = c.real, c.imag
-    if b == 0:
-        return f"{a}"
-    elif a == 0:
-        if b == 1:
-            return "i"
-        elif b == -1:
-            return "-i"
-        else:
-            return f"{b}i"
-    else:
-        sign = " + " if b >= 0 else " - "
-        b_abs = abs(b)
-        if b_abs == 1:
-            b_str = ""
-        else:
-            b_str = f"{b_abs}"
-        return f"({a}{sign}{b_str}i)"
+    r = reduzir(c.real)
+    i = reduzir(c.imag)
+
+    if c.imag == 0:
+        return r
+    if c.real == 0:
+        return i + "i"
+    return f"({r} {'+' if c.imag >= 0 else '-'} {i}i)"
+
 
 class Node:
-    def __init__(self, type, value=None, esquerda=None, direita=None):
-        self.type = type  
-        self.value = value
-        self.esquerda = esquerda
-        self.direita = direita
+    def __init__(self, tipo, valor=None, esq=None, dir=None):
+        self.tipo = tipo
+        self.valor = valor
+        self.esq = esq
+        self.dir = dir
 
 def tokenize(expr):
     tokens = []
     i = 0
+
     while i < len(expr):
+
         if expr[i].isspace():
             i += 1
             continue
-        if expr[i] in '+-*/()^':
+
+        if expr.startswith("**", i):
+            tokens.append("**")
+            i += 2
+            continue
+        
+        if expr[i] in "+-*/()":
             tokens.append(expr[i])
             i += 1
-        elif expr[i].isdigit() or expr[i] == '.':
-            num = ''
-            while i < len(expr) and (expr[i].isdigit() or expr[i] == '.'):
-                num += expr[i]
-                i += 1
-            tokens.append(num)
-        elif expr[i] == 'i':
-            tokens.append('i')
-            i += 1
+            continue
+
+        
+        for func in ["sen", "cos", "tan", "ln", "log10", "raiz"]:
+            if expr.startswith(func, i):
+                tokens.append(func)
+                i += len(func)
+                break
         else:
-            raise ValueError(f"Token inválido: {expr[i]}")
+            
+            if expr[i].isdigit() or expr[i] == '.':
+                num = ""
+                while i < len(expr) and (expr[i].isdigit() or expr[i] == '.'):
+                    num += expr[i]
+                    i += 1
+
+                if i < len(expr) and expr[i] == "%":
+                    tokens.append(str(float(num) / 100))
+                    i += 1
+                else:
+                    tokens.append(num)
+
+                continue
+
+            raise ValueError(f"Caractere inválido: {expr[i]}")
+
     return tokens
+
 
 def parse_expression(expr):
     tokens = tokenize(expr)
-    def expr():
-        esquerda = term()
-        while tokens and tokens[0] in ['+', '-']:
+
+    def parse_expr():
+        node = parse_term()
+        while tokens and tokens[0] in ["+", "-"]:
             op = tokens.pop(0)
-            direita = term()
-            esquerda = Node('op', op, esquerda, direita)
-        return esquerda
-    def term():
-        esquerda = power()
-        while tokens and tokens[0] in ['*', '/']:
-            op = tokens.pop(0)
-            direita = power()
-            esquerda = Node('op', op, esquerda, direita)
-        return esquerda
-    def power():
-        esquerda = factor()
-        if tokens and tokens[0] == '^':
-            tokens.pop(0)
-            direita = power()
-            esquerda = Node('op', '^', esquerda, direita)
-        return esquerda
-    def factor():
-        if tokens[0] == '(':
-            tokens.pop(0)
-            node = expr()
-            if tokens[0] == ')':
-                tokens.pop(0)
-            else:
-                raise ValueError("Parêntese não fechado")
+            node = Node("op", op, node, parse_term())
             return node
-        else:
-            num_str = ''
-            if tokens and tokens[0] in ['+', '-']:
-                num_str = tokens.pop(0)
-            while tokens and (tokens[0].isdigit() or tokens[0] == '.'):
-                num_str += tokens.pop(0)
-            if not num_str:
-                raise ValueError("Número esperado")
-            num = float(num_str)
-            if tokens and tokens[0] == 'i':
-                tokens.pop(0)
-                return Node('number', complex(0, num))
-            else:
-                return Node('number', complex(num, 0))
-    return expr()
+        return node
+
+    def parse_term():
+        node = parse_power()
+        while tokens and tokens[0] in ["*", "/"]:
+            op = tokens.pop(0)
+            node = Node("op", op, node, parse_power())
+        return node
+
+    def parse_power():
+        node = parse_factor()
+        if tokens and tokens[0] == "**":
+            tokens.pop(0)
+            node = Node("op", "**", node, parse_power())
+        return node
+
+    def parse_factor():
+        tok = tokens.pop(0)
+
+        if tok == "(":
+            node = parse_expr()
+            if not tokens or tokens[0] != ")":
+                raise ValueError("Parêntese não fechado.")
+            tokens.pop(0)
+            return node
+
+        if tok in ["sen", "cos", "tan", "ln", "log10", "raiz"]:
+            if tokens.pop(0) != "(":
+                raise ValueError("Falta parêntese após função.")
+            inside = parse_expr()
+            if tokens.pop(0) != ")":
+                raise ValueError("Parêntese não fechado após função.")
+            return Node("func", tok, inside)
+
+        try:
+            val = float(tok)
+            return Node("num", complex(val, 0))
+        except:
+            raise ValueError("Número inválido.")
+
+    return parse_expr()
+
 
 def evaluate(node):
-    if node.type == 'number':
-        return node.value
-    elif node.type == 'op':
-        left = evaluate(node.esquerda)
-        right = evaluate(node.direita)
-        ops = {
-            '+': lambda a, b: a + b,
-            '-': lambda a, b: a - b,
-            '*': lambda a, b: a * b,
-            '/': lambda a, b: a / b if b != 0 else (_ for _ in ()).throw(ValueError("Divisão por zero")),
-            '^': lambda a, b: a ** b
-        }
-        return ops[node.value](left, right)
+    if node.tipo == "num":
+        return node.valor
 
-def trees_equal(n1, n2):
-    if n1.type != n2.type:
+    if node.tipo == "func":
+        arg = evaluate(node.esq)
+        funcoes = {
+            "sen": lambda x: seno(x),
+            "cos": lambda x: cos(x),
+            "tan": lambda x: tan(x),
+            "ln": lambda x: ln(x),
+            "log10": lambda x: log10(x),
+            "raiz": lambda x: sqrt(x),
+        }
+        return complex(funcoes[node.valor](arg.real), 0)
+
+    esquerda = evaluate(node.esq)
+    direita = evaluate(node.dir)
+
+    operacoes = {
+        "+": lambda a, b: a + b,
+        "-": lambda a, b: a - b,
+        "*": lambda a, b: a * b,
+        "/": lambda a, b: a / b,
+        "**": lambda a, b: a ** b,
+    }
+
+    return operacoes[node.valor](esquerda, direita)
+
+
+def trees_equal(a, b):
+    if a.tipo != b.tipo:
         return False
-    if n1.type == 'number':
-        return n1.value == n2.value
-    return (n1.value == n2.value and 
-            trees_equal(n1.esquerda, n2.esquerda) and 
-            trees_equal(n1.direita, n2.direita))
+    if a.tipo == "num":
+        return a.valor == b.valor
+    return (a.valor == b.valor and
+            trees_equal(a.esq, b.esq) and
+            trees_equal(a.dir, b.dir))
+
 
 while True:
-    entrada = input("\nDigite o número (feito até %): ")
-    try:
-        if "i" not in entrada:
-            resultado = float(entrada)
-        else:
-            resultado = parse_complex(entrada)
-    except ValueError:
-        print("Erro: valor inválido!")
-        continue
-
     print("""
-Qual sua operação?
+1 - Porcentagem
+2 - Expressão aritmética
+3 - Verificação de igualdade """)
 
-1  - Potência 
-2  - Raiz quadrada
-3  - Logaritmo
-4  - Logaritmo10
-5  - Seno (graus)
-6 - Cosseno (graus)
-7 - Tangente (graus)
-8 - Fatorial
-9 - Porcentagem
-10 - Avaliar expressão aritmética
-11 - Verificar igualdade de expressões
-""")
+    op = input("Escolha a opção: ")
 
-    operacao = input("Escolha a opção: ")
+    match op:
+        case "1":
+            entrada = input("Digite o número: ")
 
-    match operacao:
-        case "1":  
-            expo = input("Digite o expoente: ")
             try:
-                expo = parse_complex(expo)
-                resultado = resultado ** expo
-                print("Resultado:", format_complex(resultado))
-            except ValueError:
-                print("Erro: número inválido!")
-
-        case "2":  
-            try:
-                resultado = resultado ** 0.5
-                print("Resultado:", format_complex(resultado))
+                resultado = float(entrada)
             except:
-                print("Erro no cálculo da raiz.")
+                print("Erro no numero.")
+                continue
 
-        case "3":  
-            def exp(x):
-                soma = 1
-                term = 1
-                for i in range(1, 20):
-                    term *= x / i
-                    soma += term
-                return soma
+            p = float(input("Digite a porcentagem: "))
+            print("Resultado:", resultado * (p / 100))
 
-            def ln(y):
-                if y == 0:
-                    return None
-                x = y - 1
-                for _ in range(20):
-                    x -= (exp(x) - y) / exp(x)
-                return x
-
+        case "2":
+            expr = input("Digite expressão: ")
             try:
-                ln_result = ln(resultado)
-                if ln_result is None:
-                    print("Logaritmo indefinido para zero.")
-                else:
-                    print("Resultado:", format_complex(ln_result))
-            except:
-                print("Erro no cálculo do logaritmo.")
-
-        case "4":
-            def exp(x):
-                soma = 1
-                term = 1
-                for i in range(1, 20):
-                    term *= x / i
-                    soma += term
-                return soma
-
-            def ln(y):
-                if y == 0:
-                    return None
-                x = y - 1
-                for _ in range(20):
-                    x -= (exp(x) - y) / exp(x)
-                return x
-
-            def log10(x):
-                L = ln(x)
-                if L is None:
-                    return None
-                return L / 2.302585092994
-
-            try:
-                log10_result = log10(resultado)
-                if log10_result is None:
-                    print("Logaritmo indefinido.")
-                else:
-                    print("Resultado:", format_complex(log10_result))
-            except:
-                print("Erro no cálculo do logaritmo base 10.")
-
-        case "5":
-            def seno(g):
-                rad = g * 3.141592653589793 / 180
-                s = 0
-                term = rad
-                for i in range(1, 10):
-                    s += term
-                    term *= -rad * rad / ((2*i)*(2*i+1))
-                return s
-
-            try:
-                print("Resultado:", format_complex(seno(resultado)))
-            except:
-                print("Erro no cálculo do seno.")
-
-        case "6":
-            def cos(g):
-                rad = g * 3.141592653589793 / 180
-                c = 1
-                term = 1
-                for i in range(1, 10):
-                    term *= -rad * rad / ((2*i-1)*(2*i))
-                    c += term
-                return c
-
-            try:
-                print("Resultado:", format_complex(cos(resultado)))
-            except:
-                print("Erro no cálculo do cosseno.")
-
-        case "7":
-            def seno(g):
-                rad = g * 3.141592653589793 / 180
-                s = 0
-                term = rad
-                for i in range(1, 10):
-                    s += term
-                    term *= -rad * rad / ((2*i)*(2*i+1))
-                return s
-
-            def cos(g):
-                rad = g * 3.141592653589793 / 180
-                c = 1
-                term = 1
-                for i in range(1, 10):
-                    term *= -rad * rad / ((2*i-1)*(2*i))
-                    c += term
-                return c
-
-            try:
-                c = cos(resultado)
-                if c == 0:
-                    print("Resultado: indefinido")
-                else:
-                    print("Resultado:", format_complex(seno(resultado) / c))
-            except:
-                print("Erro no cálculo da tangente.")
-
-        case "8":
-            if resultado.imag != 0 or resultado.real < 0 or resultado.real != int(resultado.real):
-                print("Fatorial funciona para inteiro positivo e real.")
-            else:
-                def fatorial(n):
-                    if n == 0 or n == 1:
-                        return 1
-                    result = 1
-                    for i in range(2, int(n) + 1):
-                        result *= i
-                    return result
-                print("Resultado:", fatorial(int(resultado.real)))
-        
-        case "9":
-            n = input("Digite a porcentagem (%): ")
-            try:
-                n = parse_complex(n)
-                resultado = resultado * (n / 100)
-                print("Resultado:", format_complex(resultado))
-            except ValueError:
-                print("Erro: número inválido!")
-
-        case "10":
-            expr = input("Digite a expressão aritmética: ")
-            try:
-                tree = parse_expression(expr)
-                result = evaluate(tree)
-                print("Resultado:", format_complex(result))
+                t = parse_expression(expr)
+                print("Resultado:", format_complex(evaluate(t)))
             except Exception as e:
-                print(f"Erro na expressão: {e}")
+                print("Erro:", e)
 
-        case "11":
-            expr1 = input("Digite a primeira expressão: ")
-            expr2 = input("Digite a segunda expressão: ")
+        case "3":
             try:
-                tree1 = parse_expression(expr1)
-                tree2 = parse_expression(expr2)
-                if trees_equal(tree1, tree2):
-                    print("As expressões são iguais.")
-                else:
-                    print("As expressões são diferentes.")
+                e1 = parse_expression(input("Calc 1: "))
+                e2 = parse_expression(input("Calc 2: "))
+                print("Iguais" if trees_equal(e1, e2) else "São diferente")
             except Exception as e:
-                print(f"Erro: {e}")
+                print("Erro:", e)
 
         case _:
-            print("Erro: operação inválida")
+            print("Opção inválida")
