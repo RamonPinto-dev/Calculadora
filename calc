@@ -114,8 +114,16 @@ def tokenize(expr):
                     num += expr[i]
                     i += 1
 
+                if i < len(expr) and expr[i] == "i":
+                    num += "i"
+                    i += 1
+
                 if i < len(expr) and expr[i] == "%":
-                    tokens.append(str(float(num) / 100))
+                    base = float(num.replace("i", "")) / 100
+                    if "i" in num:
+                        tokens.append(str(base) + "i")
+                    else:
+                        tokens.append(str(base))
                     i += 1
                 else:
                     tokens.append(num)
@@ -134,7 +142,6 @@ def nparser(expr):
         while tokens and tokens[0] in ["+", "-"]:
             op = tokens.pop(0)
             node = Node("op", op, node, ntermo())
-            return node
         return node
 
     def ntermo():
@@ -152,26 +159,28 @@ def nparser(expr):
         return node
 
     def nfator():
+        if not tokens:
+            raise ValueError("Expressão incompleta.")
+
         tok = tokens.pop(0)
 
         if tok == "(":
             node = nexpressao()
-            if not tokens or tokens[0] != ")":
+            if not tokens or tokens.pop(0) != ")":
                 raise ValueError("Parêntese não fechado.")
-            tokens.pop(0)
             return node
 
         if tok in ["sen", "cos", "tan", "ln", "log10", "raiz"]:
-            if tokens.pop(0) != "(":
+            if not tokens or tokens.pop(0) != "(":
                 raise ValueError("Falta parêntese pós função.")
             inside = nexpressao()
-            if tokens.pop(0) != ")":
+            if not tokens or tokens.pop(0) != ")":
                 raise ValueError("Parêntese não fechado pós função.")
             return Node("func", tok, inside)
 
         try:
-            val = float(tok)
-            return Node("num", complex(val, 0))
+            val = ncomplexo(tok)
+            return Node("num", val)
         except:
             raise ValueError("Número inválido.")
 
@@ -228,13 +237,19 @@ while True:
             entrada = input("Digite o número: ")
 
             try:
-                resultado = float(entrada)
+                resultado = ncomplexo(entrada)
             except:
                 print("Erro no numero.")
                 continue
 
-            p = float(input("Digite a porcentagem: "))
-            print("Resultado:", resultado * (p / 100))
+            p_input = input("Digite a porcentagem: ")
+            try:
+                p = ncomplexo(p_input)
+            except:
+                print("Erro na porcentagem.")
+                continue
+
+            print("Resultado:", format_complex(resultado * (p / 100)))
 
         case "2":
             expr = input("Digite expressão: ")
