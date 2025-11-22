@@ -24,7 +24,7 @@ def cos(g):
 def tan(g):
     c = cos(g)
     if abs(c) < 1e-12:
-        raise ValueError("Erro na tangente")
+        raise ValueError("Tangente indefinida")
     return seno(g) / c
 
 def exp(x):
@@ -49,31 +49,55 @@ def log10(x):
 def sqrt(x):
     return x ** 0.5
 
+def conj(x):
+    return x.conjugate()
+
 def reduzir(x):
     return f"{x:.3f}".rstrip("0").rstrip(".")
 
 def ncomplexo(s):
-    s = s.strip()
-
-    if s.endswith("i"):
-        base = s[:-1]
-        if base == "" or base == "+":
-            return complex(0, 1)
-        if base == "-":
-            return complex(0, -1)
-        return complex(0, float(base))
-
-    return complex(float(s), 0)
+    s = s.strip().replace(" ", "").lower()
+    if s == "":
+        raise ValueError("Entrada vazia")
+    s = s.replace("j", "i")
+    if s == "i":
+        return complex(0, 1)
+    if s == "-i":
+        return complex(0, -1)
+    if "i" in s:
+        idx = -1
+        for i, ch in enumerate(s[:-1], start=0): 
+            if (ch == "+" or ch == "-") and i != 0:
+                idx = i
+        if idx != -1:
+            real_part = s[:idx]
+            imag_part = s[idx:-1]  
+            real_val = float(real_part) if real_part not in ("", "+", "-") else (0.0 if real_part=="" else float(real_part))
+            if imag_part in ("+", "-"):
+                imag_val = 1.0 if imag_part == "+" else -1.0
+            else:
+                imag_val = float(imag_part)
+            return complex(real_val, imag_val)
+        else:
+            base = s[:-1]
+            if base in ("", "+"):
+                return complex(0, 1)
+            if base == "-":
+                return complex(0, -1)
+            return complex(0, float(base))
+    else:
+        return complex(float(s), 0)
 
 def format_complex(c):
     r = reduzir(c.real)
-    i = reduzir(c.imag)
-
+    i = reduzir(abs(c.imag))
     if c.imag == 0:
         return r
     if c.real == 0:
-        return i + "i"
-    return f"({r} {'+' if c.imag >= 0 else '-'} {i}i)"
+        sign = "-" if c.imag < 0 else ""
+        return sign + i + "i"
+    sign = " - " if c.imag < 0 else " + "
+    return f"({r}{sign}{i}i)"
 
 class Node:
     def __init__(self, tipo, valor=None, esq=None, dir=None):
@@ -82,190 +106,238 @@ class Node:
         self.esq = esq
         self.dir = dir
 
+variaveis = {}
+
 def tokenize(expr):
+    expr = expr.strip()
     tokens = []
     i = 0
-
+    funcs = ["sen","cos","tan","ln","log10","raiz","conj"]
     while i < len(expr):
-
-        if expr[i].isspace():
+        ch = expr[i]
+        if ch.isspace():
             i += 1
             continue
-
         if expr.startswith("**", i):
             tokens.append("**")
             i += 2
             continue
-        
-        if expr[i] in "+-*/()":
-            tokens.append(expr[i])
+        if ch in "+-*/()":
+            tokens.append(ch)
             i += 1
             continue
-
-        for func in ["sen", "cos", "tan", "ln", "log10", "raiz"]:
-            if expr.startswith(func, i):
-                tokens.append(func)
-                i += len(func)
+        matched = False
+        for f in funcs:
+            if expr.startswith(f, i):
+                tokens.append(f)
+                i += len(f)
+                matched = True
                 break
-        else:
-            if expr[i].isdigit() or expr[i] == '.':
-                num = ""
-                while i < len(expr) and (expr[i].isdigit() or expr[i] == '.'):
-                    num += expr[i]
-                    i += 1
-
-                if i < len(expr) and expr[i] == "i":
-                    num += "i"
-                    i += 1
-
-                if i < len(expr) and expr[i] == "%":
-                    base = float(num.replace("i", "")) / 100
-                    if "i" in num:
-                        tokens.append(str(base) + "i")
-                    else:
-                        tokens.append(str(base))
-                    i += 1
+        if matched:
+            continue
+        if ch.isdigit() or ch == '.':
+            num = ""
+            while i < len(expr) and (expr[i].isdigit() or expr[i] == '.'):
+                num += expr[i]
+                i += 1
+            if i < len(expr) and expr[i] == "i":
+                num += "i"
+                i += 1
+            if i < len(expr) and expr[i] == "%":
+                base = float(num.replace("i","")) / 100
+                if "i" in num:
+                    tokens.append(str(base) + "i")
                 else:
-                    tokens.append(num)
-
-                continue
-
-            raise ValueError(f"Invalido: {expr[i]}")
-
+                    tokens.append(str(base))
+                i += 1
+            else:
+                tokens.append(num)
+            continue
+        if ch.isalpha():
+            ident = ""
+            while i < len(expr) and expr[i].isalpha():
+                ident += expr[i]
+                i += 1
+            tokens.append(ident)
+            continue
+        raise ValueError(f"Caractere inválido: {ch}")
     return tokens
 
 def nparser(expr):
     tokens = tokenize(expr)
-
     def nexpressao():
         node = ntermo()
-        while tokens and tokens[0] in ["+", "-"]:
+        while tokens and tokens[0] in ["+","-"]:
             op = tokens.pop(0)
-            node = Node("op", op, node, ntermo())
+            direita = ntermo()
+            node = Node("op", op, node, direita)
         return node
-
     def ntermo():
         node = npotencia()
-        while tokens and tokens[0] in ["*", "/"]:
+        while tokens and tokens[0] in ["*","/"]:
             op = tokens.pop(0)
-            node = Node("op", op, node, npotencia())
+            direita = npotencia()
+            node = Node("op", op, node, direita)
         return node
-
     def npotencia():
         node = nfator()
         if tokens and tokens[0] == "**":
             tokens.pop(0)
-            node = Node("op", "**", node, npotencia())
+            node = Node("op","**",node,npotencia())
         return node
-
     def nfator():
         if not tokens:
-            raise ValueError("Expressão incompleta.")
-
+            raise ValueError("Conta incompleta")
         tok = tokens.pop(0)
-
         if tok == "(":
             node = nexpressao()
             if not tokens or tokens.pop(0) != ")":
-                raise ValueError("Parêntese não fechado.")
+                raise ValueError("Parêntese não fechado")
             return node
-
-        if tok in ["sen", "cos", "tan", "ln", "log10", "raiz"]:
+        if tok in ["sen","cos","tan","ln","log10","raiz","conj"]:
             if not tokens or tokens.pop(0) != "(":
-                raise ValueError("Falta parêntese pós função.")
+                raise ValueError("Falta parêntese pós função")
             inside = nexpressao()
             if not tokens or tokens.pop(0) != ")":
-                raise ValueError("Parêntese não fechado pós função.")
+                raise ValueError("Parêntese não fechado pós função")
             return Node("func", tok, inside)
-
+        if tok == "+":
+            return nfator()
+        if tok == "-":
+            nodo = nfator()
+            return Node("op","*", Node("num", complex(-1,0)), nodo)
+        if tok in variaveis:
+            return Node("num", variaveis[tok])
         try:
             val = ncomplexo(tok)
             return Node("num", val)
         except:
-            raise ValueError("Número inválido.")
-
-    return nexpressao()
+            return Node("var", tok)
+    node = nexpressao()
+    if tokens:
+        raise ValueError("Tokens sobrando / sintaxe inválida")
+    return node
 
 def evaluate(node):
     if node.tipo == "num":
         return node.valor
-
+    if node.tipo == "var":
+        nome = node.valor
+        if nome in variaveis:
+            return variaveis[nome]
+        entrada = input(f"Valor da variável {nome}: ")
+        try:
+            val = ncomplexo(entrada)
+        except:
+            raise ValueError("Valor de variável inválido")
+        variaveis[nome] = val
+        return val
     if node.tipo == "func":
         arg = evaluate(node.esq)
         funcoes = {
-            "sen": lambda x: seno(x),
-            "cos": lambda x: cos(x),
-            "tan": lambda x: tan(x),
-            "ln": lambda x: ln(x),
-            "log10": lambda x: log10(x),
-            "raiz": lambda x: sqrt(x),
+            "sen": lambda x: complex(seno(x.real),0),
+            "cos": lambda x: complex(cos(x.real),0),
+            "tan": lambda x: complex(tan(x.real),0),
+            "ln": lambda x: complex(ln(x.real),0),
+            "log10": lambda x: complex(log10(x.real),0),
+            "raiz": lambda x: complex(sqrt(x.real),0),
+            "conj": lambda x: conj(x)
         }
-        return complex(funcoes[node.valor](arg.real), 0)
-
+        if node.valor not in funcoes:
+            raise ValueError("Função inexistente")
+        return funcoes[node.valor](arg)
     esquerda = evaluate(node.esq)
     direita = evaluate(node.dir)
-
-    operacoes = {
-        "+": lambda a, b: a + b,
-        "-": lambda a, b: a - b,
-        "*": lambda a, b: a * b,
-        "/": lambda a, b: a / b,
-        "**": lambda a, b: a ** b,
+    ops = {
+        "+": lambda a,b: a + b,
+        "-": lambda a,b: a - b,
+        "*": lambda a,b: a * b,
+        "/": lambda a,b: (_ for _ in ()).throw(ZeroDivisionError()) if (b.real==0 and b.imag==0) else a / b,
+        "**": lambda a,b: a ** b
     }
+    if node.valor not in ops:
+        raise ValueError("Operador inválido")
+    try:
+        return ops[node.valor](esquerda,direita)
+    except ZeroDivisionError:
+        raise ZeroDivisionError("Divisão por zero")
 
-    return operacoes[node.valor](esquerda, direita)
+def mostrar_lisp(node):
+    if node.tipo == "num":
+        return format_complex(node.valor)
+    if node.tipo == "var":
+        return node.valor
+    if node.tipo == "func":
+        return f"({node.valor} {mostrar_lisp(node.esq)})"
+    return f"({node.valor} {mostrar_lisp(node.esq)} {mostrar_lisp(node.dir)})"
 
-def igual(a, b):
-    if a.tipo != b.tipo:
-        return False
-    if a.tipo == "num":
-        return a.valor == b.valor
-    return (a.valor == b.valor and
-            igual(a.esq, b.esq) and
-            igual(a.dir, b.dir))
+def igual(a,b):
+    va = evaluate(a)
+    vb = evaluate(b)
+    return format_complex(va) == format_complex(vb)
 
 while True:
     print("""
 1 - Porcentagem
 2 - Expressão aritmética
-3 - Verificação de igualdade """)
-
+3 - Verificação de igualdade
+4 - Definir variável
+"_" - Sair""")
     op = input("Escolha a opção: ")
-
+    if op.lower() == "_":
+        break
     match op:
         case "1":
             entrada = input("Digite o número: ")
-
             try:
                 resultado = ncomplexo(entrada)
-            except:
-                print("Erro no numero.")
+            except Exception:
+                print("Erro: número inválido")
                 continue
-
             p_input = input("Digite a porcentagem: ")
             try:
                 p = ncomplexo(p_input)
             except:
-                print("Erro na porcentagem.")
+                print("Erro: porcentagem inválida")
                 continue
-
-            print("Resultado:", format_complex(resultado * (p / 100)))
-
+            try:
+                res = resultado * (p / 100)
+            except Exception:
+                print("Erro no cálculo")
+                continue
+            print("Resultado:", format_complex(res))
         case "2":
             expr = input("Digite expressão: ")
             try:
-                t = nparser(expr)
-                print("Resultado:", format_complex(evaluate(t)))
+                arv = nparser(expr)
+                print("Árvore LISP:", mostrar_lisp(arv))
+                res = evaluate(arv)
+                print("Resultado:", format_complex(res))
+            except ZeroDivisionError:
+                print("Erro: divisão por zero")
             except Exception as e:
                 print("Erro:", e)
-
         case "3":
+            e1s = input("Expr 1: ")
+            e2s = input("Expr 2: ")
             try:
-                e1 = nparser(input("Calc 1: "))
-                e2 = nparser(input("Calc 2: "))
-                print("Iguais" if igual(e1, e2) else "São diferente")
+                a1 = nparser(e1s)
+                a2 = nparser(e2s)
+                print("Árvore 1:", mostrar_lisp(a1))
+                print("Árvore 2:", mostrar_lisp(a2))
+                iguais = igual(a1,a2)
+                print("Iguais" if iguais else "São diferentes")
+            except ZeroDivisionError:
+                print("Erro: divisão por zero")
             except Exception as e:
                 print("Erro:", e)
-
+        case "4":
+            nome = input("Nome da variável: ")
+            valor = input("Valor: ")
+            try:
+                variaveis[nome] = ncomplexo(valor)
+                print("OK")
+            except:
+                print("Erro no valor")
         case _:
             print("Opção inválida")
