@@ -332,12 +332,19 @@ while True:
             except Exception as e:
                 print("Erro:", e)
         case "4":
-            nome = input("Nome da variável: ")
-            valor = input("Valor: ")
+            nome = input("Nome da variável: ").strip()
+
+            if not nome.isalpha():
+                print("Erro: Nome de variável deve ter apenas letras.")
+                continue
+
+            expr = input("Valor: ")
+
             try:
-                variaveis[nome] = ncomplexo(valor)
-                print("OK")
-            except:
-                print("Erro no valor")
-        case _:
-            print("Opção inválida")
+                arv = nparser(expr)          
+                val = evaluate(arv)          
+                variaveis[nome] = val        
+                print(f"Variável '{nome}' foi definida como {format_complex(val)}")
+            except Exception as e:
+                print("Erro ao definir variável:", e)
+
