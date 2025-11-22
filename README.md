@@ -1,30 +1,28 @@
 # Calculadora
 Calculadora cientifica para a A3
 
-Aritméticos
-+ soma
-- subtração
-* multiplicação
-/ divisão
-** potência
-Parenteses
-() controle de prioridade da conta
-Trigonometria (graus)
-sen(x)
-cos(x)
-tan(x)
-Exponenciais e Logaritmos
-ln(x) → logaritmo 
-log10(x) → log10
-Raiz quadrada
-raiz(x)
-Porcentagem usando opção 1
-insere valor e quantos %
-Numero complex.
-o parser suporta:
-"5"
-"5i"
-"-2i"
-"3.14"
-Comparação de igualdade
-Usando a opção 3
+Guia rápido — Como usar a calculadora
+
+Opção 1 – Porcentagem
+Digite um número e depois a porcentagem.
+Ex.: número = 200, porcentagem = 10 → resultado = 20.
+
+Opção 2 – Expressão aritmética
+Digite qualquer conta com:
++ - * / ** raiz() conj() sen() cos() tan() ln() log10()
+Pode usar complexos (3+2i) e variáveis (x, y). etc
+Se usar variável, o programa vai pedir o valor.
+
+Exemplos válidos:
+3+2i
+raiz(9)
+(2+3i) * conj(4-i)
+a + 2b - raiz(c)
+
+Opção 3 – Verificar se expressões são iguais
+Digite duas contas e o programa compara.
+Ex.: 2+a e a+2.
+
+Opção 4 – Definir variável
+Cria uma variável e atribui um valor.
+Ex.: nome = x, valor = 3-2i.
