@@ -50,7 +50,7 @@ def sqrt(x):
     return x ** 0.5
 
 def conj(x):
-    return x.conjugate()
+    return complex(x.real, -x.imag)
 
 def reduzir(x):
     return f"{x:.3f}".rstrip("0").rstrip(".")
@@ -246,15 +246,48 @@ def evaluate(node):
         if node.valor not in funcoes:
             raise ValueError("Função inexistente")
         return funcoes[node.valor](arg)
+    
+    // Operadores binários:
     esquerda = evaluate(node.esq)
     direita = evaluate(node.dir)
-    ops = {
-        "+": lambda a,b: a + b,
-        "-": lambda a,b: a - b,
-        "*": lambda a,b: a * b,
-        "/": lambda a,b: (_ for _ in ()).throw(ZeroDivisionError()) if (b.real==0 and b.imag==0) else a / b,
-        "**": lambda a,b: a ** b
-    }
+    if node.valor == "+":
+        # (a + bi) + (c + di) = (a + c) + (bi + di):
+        return complex(esquerda.real + direita.real, esquerda.imag + direita.imag)
+    elif node.valor == "-":
+        # (a + bi) + (c + di) = (a - c) + (bi - di):
+        return complex(esquerda.real - direita.real, esquerda.imag - direita.imag)
+    
+    elif node.valor == "*":
+        # Distributiva:
+        # (a + bi) * (c + di) = a(c + di) + bi(c + di) = ac + adi + bci + bdi*i = ac + adi + bci - bd =
+        # ac - bd + adi + bci = (ac - bd) + (ad + bc)i
+        real = esquerda.real * direita.real - esquerda.imag * direita.imag
+        imag = esquerda.real * direita.imag + esquerda.imag * direita.real
+        return complex(real, imag)
+    
+    elif node.valor == "/":
+        # (a+bi)/(c+di) = (a+bi)/(c+di) * (c-di)/(c-di) = (ac - adi + bci - bdi*i)/(c^2 - cdi + cdi - d^2*i^2) =
+        # (ac + bd + bci - adi)/(c^2 + d^2) =
+        # [(ac + bd) + (bc - ad)i] / (c^2 + d^2) =
+        # (ac + bd)/(c^2 + d^2) + (bc - ad)i/(c^2 + d^2)
+        if direita.real == 0 and direita.imag == 0:
+            raise ZeroDivisionError("Divisão por zero")
+        denominador = direita.real**2 + direita.imag**2
+        real = (esquerda.real * direita.real + esquerda.imag * direita.imag) / denominador
+        imag = (esquerda.imag * direita.real - esquerda.real * direita.imag) / denominador
+        return complex(real, imag)
+    
+    elif node.valor == "**":
+        # Se o exponente for inteiro, será feito as multiplicações manualmente:
+        # For complex exponents, this is more complicated - we'll use Python's for now
+        # but you could implement using exponential form: r*e^(iθ)
+        if direita.imag == 0 and direita.real == int(direita.real):
+            # Integer exponent - do manual multiplication
+            result = complex(1, 0)
+            for _ in range(int(direita.real)):
+                result = evaluate(Node("op", "*", Node("num", result), Node("num", esquerda)))
+            return result
+
     if node.valor not in ops:
         raise ValueError("Operador inválido")
     try:
