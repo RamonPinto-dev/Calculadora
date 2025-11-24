@@ -308,6 +308,7 @@ while True:
 2 - Expressão aritmética
 3 - Verificação de igualdade
 4 - Definir variável
+5 - Exibir valores salvos
 "_" - Sair""")
     op = input("Escolha a opção: ")
     if op.lower() == "_":
@@ -373,4 +374,11 @@ while True:
                 print(f"Variável '{nome}' foi definida como {format_complex(val)}")
             except Exception as e:
                 print("Erro ao definir variável:", e)
+        case "5":
+            if not variaveis:
+                print("Nenhuma variável salva.")
+            else:
+                print("VARIÁVEIS SALVAS:")
+                for nome, valor in variaveis.items():
+                    print(f"{nome} = {format_complex(valor)}")
 
