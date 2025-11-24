@@ -20,7 +20,7 @@ def tang(g):
     # tan(z) = sin(z) / cos(z)
     seno_g = seno(g)
     cos_g = coss(g)
-    if math.cos_z.real == 0 and math.cos_z.imag == 0:
+    if cos_g.real == 0 and cos_g.imag == 0:
         raise ValueError("Tangente indefinida (divisão por 0)")
     return (seno_g/cos_g)
 
@@ -59,7 +59,7 @@ def logn(x):
         magnitude = raizQ(x.real**2 + x.imag**2)
 
         # theta:
-        theta = math.atan(x.imag, x.real)
+        theta = math.atan(x.imag/x.real)
 
         parte_real = logn(magnitude)
         parte_imag = theta
@@ -309,11 +309,35 @@ def evaluate(node):
         return complex(real, imag)
     
     elif node.valor == "**":
-        if direita.imag == 0 and direita.real == int(direita.real):
-            result = complex(1, 0)
-            for _ in range(int(direita.real)):
-                result = evaluate(Node("op", "*", Node("num", result), Node("num", esquerda)))
-            return result
+        # Potência complexa. Para isto se utiliza esta formula baseada na formula de Euler: z^w = e^(w*ln(z))
+
+        # Se a base for 0...
+        if direita.real == 0 and direita.imag == 0:
+
+            # ...e o expoente também for 0, retorna 1, por convenção.
+            if esquerda.real == 0 and esquerda.imag == 0:
+                return complex(1, 0)
+            
+            # ...e o expoente for positivo, retorna 0.
+            elif direita.real > 0:
+                return complex(0, 0)
+            
+            # ...e o expoente for 0, invalido:
+            else:
+                raise ValueError("Invalido (divisão por 0)")
+        
+        # ln(z) = ln(r) + i*theta, como já estabelecido (na função logn)
+        magnitude = raizQ(direita.real**2 + direita.imag**2) 
+        theta = math.arctan(esquerda.imag/esquerda.real)
+    
+        # w * ln(z) = (a + bi) * (ln(r) + iθ) = a*ln(r) + a*theta*i + ln(r)*b*i + b*theta*i*i =
+        # a*ln(r) + a*theta*i + ln(r)*b*i - b*theta = (a*ln(r) - b*theta) + i*(a*theta + b*ln(r))
+        expoente_real = esquerda.real * logn(magnitude) - esquerda.imag * theta
+        expoente_imag = esquerda.real * theta + esquerda.imag * logn(magnitude)
+        expoente = complex(expoente_real, expoente_imag)
+
+        # Finalmente calcular e^(w*ln(z)):
+        return expoente
 
     else:
         raise ValueError("Operador inválido")
