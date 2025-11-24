@@ -6,21 +6,21 @@ PI = 3.14
 
 def seno(g):
     # sin(a + bi) = sin(a)cosh(b) + i*cos(a)sinh(b)
-    parte_real = sin(g.real) * cosh(g.imag)
-    parte_imag = cos(g.real) * sinh(g.imag)
+    parte_real = math.sin(g.real) * math.cosh(g.imag)
+    parte_imag = math.cos(g.real) * math.sinh(g.imag)
     return complex(parte_real, parte_imag)
 
 def cos(g):
     # cos(a + bi) = cos(a)cosh(b) - i*sin(a)sinh(b)
-    parte_real = cos(g.real) * cosh(g.imag)
-    parte_imag = -sin(g.real) * sinh(g.imag)
+    parte_real = math.cos(g.real) * math.cosh(g.imag)
+    parte_imag = - math.sin(g.real) * math.sinh(g.imag)
     return complex(parte_real, parte_imag)
 
 def tan(g):
     # tan(z) = sin(z) / cos(z)
     seno_g = seno(g)
     cos_g = cos(g)
-    if cos_z.real == 0 and cos_z.imag == 0:
+    if math.cos_z.real == 0 and math.cos_z.imag == 0:
         raise ValueError("Tangente indefinida (divisão por 0)")
     return (seno_g/cos_g)
 
