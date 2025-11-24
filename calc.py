@@ -1,20 +1,39 @@
 print("== CALCULADORA CIENTÍFICA ==")
 print("== TRABALHO DO LINDO WELLIGTON ==")
-import math
 
-PI = 3.14
+PI = 3.141592653589793
 
 def seno(g):
-    # sin(a + bi) = sin(a)cosh(b) + i*cos(a)sinh(b)
-    parte_real = math.sin(g.real) * math.cosh(g.imag)
-    parte_imag = math.cos(g.real) * math.sinh(g.imag)
-    return complex(parte_real, parte_imag)
+    # Números complexos:
+    if isinstance(g, complex):
+        # sin(a + bi) = sin(a)cosh(b) + i*cos(a)sinh(b)
+        parte_real = seno(g.real) * cossh(g.imag)
+        parte_imag = coss(g.real) * senoh(g.imag)
+        return complex(parte_real, parte_imag)
+    # Números reais (Série de Taylor):
+    else:
+        soma = 0
+        termo = g
+        for n in range(1, 15):
+            soma += termo
+            termo *= -g*g / ((2*n) * (2*n+1))
+        return soma
 
 def coss(g):
-    # cos(a + bi) = cos(a)cosh(b) - i*sin(a)sinh(b)
-    parte_real = math.cos(g.real) * math.cosh(g.imag)
-    parte_imag = - math.sin(g.real) * math.sinh(g.imag)
-    return complex(parte_real, parte_imag)
+    # Números complexos:
+    if isinstance(g, complex):
+        # cos(a + bi) = cos(a)cosh(b) - i*sin(a)sinh(b)
+        parte_real = coss(g.real) * cossh(g.imag)
+        parte_imag = - seno(g.real) * senoh(g.imag)
+        return complex(parte_real, parte_imag)
+    # Números reais (Série de Taylor):
+    else:
+        soma = 1
+        termo = 1
+        for n in range(1, 15):
+            termo *= -g*g / ((2*n-1) * (2*n))
+            soma += termo
+        return soma
 
 def tang(g):
     # tan(z) = sin(z) / cos(z)
@@ -23,6 +42,42 @@ def tang(g):
     if cos_g.real == 0 and cos_g.imag == 0:
         raise ValueError("Tangente indefinida (divisão por 0)")
     return (seno_g/cos_g)
+
+def senoh(g):
+    # sinh(x) = (e^x - e^(-x)) / 2
+    return (expo(g) - expo(-g)) / 2
+
+def cossh(g):
+    # cosh(x) = (e^x + e^(-x)) / 2
+    return (expo(g) + expo(-g)) / 2
+
+def arctang_taylor(g):
+    if abs(g) > 1:
+        return (PI/2) - arctang_taylor(1/g)
+    soma = 0
+    termo = g
+    for n in range(0, 20):
+        soma += termo / (2*n + 1)
+        termo *= -g*g
+    return soma
+
+def arctang(b, a):
+    if a > 0:
+        return arctang_taylor(b/a)
+    elif a < 0:
+        if b >= 0:
+            return arctang_taylor(b/a) + PI
+        else:
+            return arctang_taylor(b/a) - PI
+    else:
+        if b > 0:
+            return PI/2
+        elif b < 0:
+            return -PI/2
+        else:
+            raise ValueError("Invalido (divisão por 0)")
+            
+
 
 def expo(x):
     # Se o número for complexo:
@@ -56,10 +111,10 @@ def logn(x):
             raise ValueError("ln não funciona em zero")
     
         # r:
-        magnitude = raizQ(x.real**2 + x.imag**2)
+        magnitude = raizQ(x.real*x.real + x.imag*x.imag)
 
         # theta:
-        theta = math.atan(x.imag/x.real)
+        theta = arctang(x.imag, x.real)
 
         parte_real = logn(magnitude)
         parte_imag = theta
@@ -300,7 +355,7 @@ def evaluate(node):
             "sen": lambda x: seno(x),
             "cos": lambda x: coss(x),
             "tan": lambda x: tang(x),
-            "logn": lambda x: logn(x),
+            "ln": lambda x: logn(x),
             "log10": lambda x: log10(x),
             "raiz": lambda x: raizQ(x),
             "conj": lambda x: conj(x)
@@ -341,16 +396,18 @@ def evaluate(node):
     
     elif node.valor == "**":
         # Potência complexa. Para isto se utiliza esta formula baseada na formula de Euler: z^w = e^(w*ln(z))
+        base = esquerda
+        expoente = direita
 
         # Se a base for 0...
-        if direita.real == 0 and direita.imag == 0:
+        if base.real == 0 and base.imag == 0:
 
             # ...e o expoente também for 0, retorna 1, por convenção.
-            if esquerda.real == 0 and esquerda.imag == 0:
+            if expoente.real == 0 and expoente.imag == 0:
                 return complex(1, 0)
             
             # ...e o expoente for positivo, retorna 0.
-            elif direita.real > 0:
+            elif expoente.real > 0:
                 return complex(0, 0)
             
             # ...e o expoente for 0, invalido:
@@ -358,17 +415,17 @@ def evaluate(node):
                 raise ValueError("Invalido (divisão por 0)")
         
         # ln(z) = ln(r) + i*theta, como já estabelecido (na função logn)
-        magnitude = raizQ(direita.real**2 + direita.imag**2) 
-        theta = math.arctan(esquerda.imag/esquerda.real)
+        magnitude = raizQ(base.real*base.real + base.imag*base.imag) 
+        theta = arctang(base.imag, base.real)
     
         # w * ln(z) = (a + bi) * (ln(r) + iθ) = a*ln(r) + a*theta*i + ln(r)*b*i + b*theta*i*i =
         # a*ln(r) + a*theta*i + ln(r)*b*i - b*theta = (a*ln(r) - b*theta) + i*(a*theta + b*ln(r))
-        expoente_real = esquerda.real * logn(magnitude) - esquerda.imag * theta
-        expoente_imag = esquerda.real * theta + esquerda.imag * logn(magnitude)
+        expoente_real = expoente.real * logn(magnitude) - expoente.imag * theta
+        expoente_imag = expoente.real * theta + expoente.imag * logn(magnitude)
         expoente = complex(expoente_real, expoente_imag)
 
         # Finalmente calcular e^(w*ln(z)):
-        return expoente
+        return expo(expoente)
 
     else:
         raise ValueError("Operador inválido")
