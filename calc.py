@@ -1,31 +1,28 @@
 print("== CALCULADORA CIENTÍFICA ==")
 print("== TRABALHO DO LINDO WELLIGTON ==")
+import math
 
 PI = 3.14
 
 def seno(g):
-    rad = g * PI / 180
-    s = 0
-    term = rad
-    for i in range(1, 10):
-        s += term
-        term *= -(rad * rad) / ((2 * i) * (2 * i + 1))
-    return s
+    # sin(a + bi) = sin(a)cosh(b) + i*cos(a)sinh(b)
+    parte_real = sin(g.real) * cosh(g.imag)
+    parte_imag = cos(g.real) * sinh(g.imag)
+    return complex(parte_real, parte_imag)
 
 def cos(g):
-    rad = g * PI / 180
-    c = 1
-    term = 1
-    for i in range(1, 10):
-        term *= -(rad * rad) / ((2 * i - 1) * (2 * i))
-        c += term
-    return c
+    # cos(a + bi) = cos(a)cosh(b) - i*sin(a)sinh(b)
+    parte_real = cos(g.real) * cosh(g.imag)
+    parte_imag = -sin(g.real) * sinh(g.imag)
+    return complex(parte_real, parte_imag)
 
 def tan(g):
-    c = cos(g)
-    if abs(c) < 1e-12:
-        raise ValueError("Tangente indefinida")
-    return seno(g) / c
+    # tan(z) = sin(z) / cos(z)
+    seno_g = seno(g)
+    cos_g = cos(g)
+    if cos_z.real == 0 and cos_z.imag == 0:
+        raise ValueError("Tangente indefinida (divisão por 0)")
+    return (seno_g/cos_g)
 
 def exp(x):
     soma = 1
@@ -235,9 +232,9 @@ def evaluate(node):
     if node.tipo == "func":
         arg = evaluate(node.esq)
         funcoes = {
-            "sen": lambda x: complex(seno(x.real),0),
-            "cos": lambda x: complex(cos(x.real),0),
-            "tan": lambda x: complex(tan(x.real),0),
+            "sen": lambda x: seno(x),
+            "cos": lambda x: cos(x),
+            "tan": lambda x: tan(x),
             "ln": lambda x: complex(ln(x.real),0),
             "log10": lambda x: complex(log10(x.real),0),
             "raiz": lambda x: complex(sqrt(x.real),0),
@@ -247,7 +244,7 @@ def evaluate(node):
             raise ValueError("Função inexistente")
         return funcoes[node.valor](arg)
     
-    // Operadores binários:
+    # Operadores binários:
     esquerda = evaluate(node.esq)
     direita = evaluate(node.dir)
     if node.valor == "+":
@@ -288,7 +285,7 @@ def evaluate(node):
                 result = evaluate(Node("op", "*", Node("num", result), Node("num", esquerda)))
             return result
 
-    if node.valor not in ops:
+    else:
         raise ValueError("Operador inválido")
     try:
         return ops[node.valor](esquerda,direita)
