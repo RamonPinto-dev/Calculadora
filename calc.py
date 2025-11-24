@@ -10,38 +10,72 @@ def seno(g):
     parte_imag = math.cos(g.real) * math.sinh(g.imag)
     return complex(parte_real, parte_imag)
 
-def cos(g):
+def coss(g):
     # cos(a + bi) = cos(a)cosh(b) - i*sin(a)sinh(b)
     parte_real = math.cos(g.real) * math.cosh(g.imag)
     parte_imag = - math.sin(g.real) * math.sinh(g.imag)
     return complex(parte_real, parte_imag)
 
-def tan(g):
+def tang(g):
     # tan(z) = sin(z) / cos(z)
     seno_g = seno(g)
-    cos_g = cos(g)
+    cos_g = coss(g)
     if math.cos_z.real == 0 and math.cos_z.imag == 0:
         raise ValueError("Tangente indefinida (divisão por 0)")
     return (seno_g/cos_g)
 
-def exp(x):
-    soma = 1
-    term = 1
-    for i in range(1, 20):
-        term *= x / i
-        soma += term
-    return soma
+def expo(x):
+    # Se o número for complexo:
+    if isinstance(x, complex):
+        # e^(a+bi) = e^a * (cos(b) + i*sin(b)), a formula de Euler
+        magnitude = expo(x.real) # e^a
 
-def ln(y):
-    if y == 0:
-        raise ValueError("ln não funciona em zero")
-    x = y - 1
-    for _ in range(20):
-        x -= (exp(x) - y) / exp(x)
-    return x
+        parte_real = magnitude * coss(x.imag)
+        parte_imag = magnitude * seno(x.imag)
+        return complex(parte_real, parte_imag)
+    
+    # Série de Taylor para numero real:
+    else:
+        soma = 1
+        term = 1
+        for i in range(1, 20):
+            term *=  x/i
+            soma += term
+        return soma
+
+def logn(x):
+    # Aqui é necessário usar a forma polar do número complexo, r*e^(i*theta)
+    # ln(r*e^(i*theta)) = ln(r) + i*theta
+    # Para achar r é só utilizar o teorema de Pitagoras, r = raiz quadrada de (a^2 + b^2)
+    # Theta é arctan(b/a)
+
+    # Quando o número for complexo:
+    if isinstance(x, complex):
+        # Zero:
+        if x.real == 0 and x.imag == 0:
+            raise ValueError("ln não funciona em zero")
+    
+        # r:
+        magnitude = raizQ(x.real**2 + x.imag**2)
+
+        # theta:
+        theta = math.atan(x.imag, x.real)
+
+        parte_real = logn(magnitude)
+        parte_imag = theta
+        return complex(parte_real, parte_imag)
+    
+    # Para os números reais:
+    else:
+        if x == 0:
+            raise ValueError("ln não funciona em zero")
+        y = x - 1
+        for _ in range(20):
+            y -= (exp(y) - x) / exp(y)
+        return y
 
 def log10(x):
-    return ln(x) / 2.302585092994
+    return logn(x) / logn(10)
 
 def sqrt(x):
     return x ** 0.5
@@ -233,11 +267,11 @@ def evaluate(node):
         arg = evaluate(node.esq)
         funcoes = {
             "sen": lambda x: seno(x),
-            "cos": lambda x: cos(x),
-            "tan": lambda x: tan(x),
-            "ln": lambda x: complex(ln(x.real),0),
-            "log10": lambda x: complex(log10(x.real),0),
-            "raiz": lambda x: complex(sqrt(x.real),0),
+            "cos": lambda x: coss(x),
+            "tan": lambda x: tang(x),
+            "logn": lambda x: logn(x),
+            "log10": lambda x: log10(x),
+            "raiz": lambda x: sqrt(x),
             "conj": lambda x: conj(x)
         }
         if node.valor not in funcoes:
@@ -381,4 +415,3 @@ while True:
                 print("VARIÁVEIS SALVAS:")
                 for nome, valor in variaveis.items():
                     print(f"{nome} = {format_complex(valor)}")
-
