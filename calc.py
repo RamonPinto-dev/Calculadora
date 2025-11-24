@@ -71,14 +71,45 @@ def logn(x):
             raise ValueError("ln não funciona em zero")
         y = x - 1
         for _ in range(20):
-            y -= (exp(y) - x) / exp(y)
+            y -= (expo(y) - x) / expo(y)
         return y
 
 def log10(x):
     return logn(x) / logn(10)
 
-def sqrt(x):
-    return x ** 0.5
+def raizQ(x):
+    # Extraindo a raiz de a + ib...
+    # v(a + bi) = x + yi.
+    # [v(a + bi)]^2 = (x + yi)^2 -> a + bi = x^2 + 2xyi + (yi)^2 = x^2 + 2xyi - y^2.
+    # Se a + bi = x^2 + 2xyi - y^2, então a = (x^2 - y^2) e bi = 2xyi.
+
+    # Se (x + iy)^2 é igual a (a + bi), como estabelecido no segundo comentário da função, concluimos que a magnitude de ambos é a mesma, r.
+    # r = raiz quadrada de (a^2 + b^2) = raiz quadrada de (x^2 + y^2)^2. v(a^2 + b^2) = (x^2 + y^2).
+
+    # a + r = (x^2 - y^2) + (x^2 + y^2) = x^2 + x^2 = 2x^2 ->
+    # (a + r)/2 = x^2 -> x = mais ou menos v[(a + r)/2]
+    # r - a = (x^2 + y^2) - (x^2 - y^2) = 2y^2 ->
+    # (r - a)/2 = y^2 -> y = mais ou menos v[(r - a)/2]
+
+    # √(a + bi) = x + yi = {mais ou menos v[(a + r)/2]} + {mais ou menos v[(r - a)/2]}*i
+    # bi = 2xyi, portanto b = 2xy. Para determinar os sinais das raizes podemos usar b.
+    # Se b for negativo, então x e y devem ter sinais opostos, se b for positivo os sinais devem ser iguais. Se b for 0 o número é real, claramente.
+    # Faremos com que x sempre seja positivo, o sinal de b determinará o sinal de y.
+    
+    a, b = x.real, x.imag
+    
+    # Se x for complexo:
+    if isinstance(x, complex):
+        magnitude = raizQ(a*a + b*b)
+        
+        parte_real = raizQ((a + magnitude) / 2)
+        parte_imag = (1 if b >= 0 else -1) * raizQ((magnitude - a) / 2)
+
+        return complex(parte_real, parte_imag)
+    
+    # Se x for real:
+    else:
+        return x ** 0.5
 
 def conj(x):
     return complex(x.real, -x.imag)
@@ -271,7 +302,7 @@ def evaluate(node):
             "tan": lambda x: tang(x),
             "logn": lambda x: logn(x),
             "log10": lambda x: log10(x),
-            "raiz": lambda x: sqrt(x),
+            "raiz": lambda x: raizQ(x),
             "conj": lambda x: conj(x)
         }
         if node.valor not in funcoes:
