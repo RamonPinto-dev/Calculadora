@@ -275,9 +275,7 @@ def evaluate(node):
         return complex(real, imag)
     
     elif node.valor == "**":
-        # Se o exponente for inteiro, será feito as multiplicações manualmente:
         if direita.imag == 0 and direita.real == int(direita.real):
-            # Integer exponent - do manual multiplication
             result = complex(1, 0)
             for _ in range(int(direita.real)):
                 result = evaluate(Node("op", "*", Node("num", result), Node("num", esquerda)))
