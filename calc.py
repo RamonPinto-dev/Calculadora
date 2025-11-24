@@ -276,8 +276,6 @@ def evaluate(node):
     
     elif node.valor == "**":
         # Se o exponente for inteiro, será feito as multiplicações manualmente:
-        # For complex exponents, this is more complicated - we'll use Python's for now
-        # but you could implement using exponential form: r*e^(iθ)
         if direita.imag == 0 and direita.real == int(direita.real):
             # Integer exponent - do manual multiplication
             result = complex(1, 0)
