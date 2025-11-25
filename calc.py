@@ -480,6 +480,7 @@ while True:
                 continue
             print("Resultado:", format_complex(res))
         case "2":
+            variaveis.clear()
             expr = input("Digite expressão: ")
             try:
                 arv = nparser(expr)
@@ -491,6 +492,7 @@ while True:
             except Exception as e:
                 print("Erro:", e)
         case "3":
+            variaveis.clear()
             e1s = input("Expr 1: ")
             e2s = input("Expr 2: ")
             try:
@@ -504,6 +506,7 @@ while True:
                 print("Erro: divisão por zero")
             except Exception as e:
                 print("Erro:", e)
+                #Basicamente inutinizavel agora/ Seria bom mudar esse case para Nome da Cosntante
         case "4":
             nome = input("Nome da variável: ").strip()
 
