@@ -341,14 +341,14 @@ def evaluate(node):
     if node.tipo == "var":
         nome = node.valor
         if nome in variaveis:
-            return variaveis[nome]
+            return evaluate(variaveis[nome])
         entrada = input(f"Valor da variável {nome}: ")
         try:
             val = ncomplexo(entrada)
         except:
             raise ValueError("Valor de variável inválido")
-        variaveis[nome] = val
-        return val
+        variaveis[nome] = valor
+        print("Variável salva com sucesso!")
     if node.tipo == "func":
         arg = evaluate(node.esq)
         funcoes = {
@@ -507,22 +507,17 @@ while True:
             except Exception as e:
                 print("Erro:", e)
                 #Basicamente inutinizavel agora/ Seria bom mudar esse case para Nome da Cosntante
+                
         case "4":
-            nome = input("Nome da variável: ").strip()
-
-            if not nome.isalpha():
-                print("Erro: Nome de variável deve ter apenas letras.")
-                continue
-
-            expr = input("Valor: ")
+            nome = input("Nome da variável: ")
+            expr = input("Expressão: ")
 
             try:
-                arv = nparser(expr)          
-                val = evaluate(arv)          
-                variaveis[nome] = val        
-                print(f"Variável '{nome}' foi definida como {format_complex(val)}")
-            except Exception as e:
-                print("Erro ao definir variável:", e)
+                valor = nparser(expr) #salva node
+                variaveis[nome] = valor
+                print("Variável salva com sucesso!")
+            except:
+                print("Erro ao definir variável:")
         case "5":
             if not variaveis:
                 print("Nenhuma variável salva.")
