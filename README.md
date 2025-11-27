@@ -1,3 +1,16 @@
+Projeto A3 - Calculadora Científica de Números Complexos
+
+Professor: Wellington Lacerda Silveira da Silva
+Disciplina: Estrutura de Dados e Análise de Algoritmos
+
+Integrantes do Grupo
+
+Breno Dantas Oliveira Filho – RA: 1272417582
+
+Ramon Queiroz G. Pinto – RA: 12724126768
+
+Adrian Ferreira Andrade – RA: 12724133589
+
 📘 Calculadora Científica — A3
 
 Este projeto é uma calculadora científica com suporte completo a números complexos, incluindo:
