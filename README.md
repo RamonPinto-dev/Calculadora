@@ -11,7 +11,7 @@ Ramon Queiroz G. Pinto – RA: 12724126768
 
 Adrian Ferreira Andrade – RA: 12724133589
 
-📘 Calculadora Científica — A3
+Calculadora Científica — A3 - 2025 
 
 Este projeto é uma calculadora científica com suporte completo a números complexos, incluindo:
 
@@ -33,8 +33,8 @@ Avaliação de expressões com variáveis
 
 Tudo foi implementado manualmente, sem usar bibliotecas matemáticas prontas (math, cmath, etc), incluindo séries de Taylor, Euler, e aritmética complexa completa.
 
-🧮 Funcionalidades Principais
-✔️ Operações suportadas
+Funcionalidades Principais
+Operações 
 
 Soma +
 
@@ -56,11 +56,11 @@ cosseno: cos()
 
 tangente: tan()
 
-logaritmo natural: ln()
+logaritmo: ln()
 
 logaritmo base 10: log10()
 
-✔️ Suporte total a números complexos
+Suporte total a números complexos
 
 Entrada no formato: a+bi, a-bi, 3i, -7i, 5, etc
 
@@ -68,7 +68,7 @@ Funções trigonométricas e exponenciais funcionam para complexos
 
 Potenciação complexa usando z^w = e^(w·ln(z))
 
-✔️ Variáveis
+Variáveis
 
 O usuário pode definir variáveis (x, y, a, etc)
 
@@ -78,7 +78,7 @@ Podem armazenar números ou complexos
 
 Ficam salvas durante a execução
 
-✔️ Sistema próprio de parsing
+Sistema próprio de parsing
 
 O programa:
 
@@ -90,7 +90,7 @@ Mostra a árvore no formato LISP
 
 Avalia recursivamente
 
-🚀 Guia rápido — Como usar a calculadora
+Como usar a calculadora
 
 Ao rodar o programa, você verá o menu:
 
@@ -101,7 +101,7 @@ Ao rodar o programa, você verá o menu:
 5 - Exibir valores salvos
 "_" - Sair
 
-🔢 Opção 1 – Porcentagem
+Opção 1 – Porcentagem
 
 Digite um número e depois uma porcentagem.
 
@@ -118,7 +118,7 @@ número = 10+5i
 porcentagem = 50
 resultado = 5+2.5i
 
-🧠 Opção 2 – Expressão aritmética
+Opção 2 – Expressão aritmética
 
 Você pode digitar qualquer expressão contendo:
 
@@ -160,7 +160,7 @@ Cada expressão mostra também sua árvore sintática LISP:
 
 Árvore LISP: (+ 3i (* 2 (conj 4i)))
 
-🔍 Opção 3 – Verificar se expressões são iguais
+Opção 3 – Verificar se expressões são iguais
 
 O programa avalia duas expressões e compara os resultados.
 
@@ -173,7 +173,7 @@ Expr 2: a+2
 
 Funciona inclusive com funções e complexos.
 
-📝 Opção 4 – Definir variável
+Opção 4 – Definir variável
 
 Cria uma variável e atribui um valor.
 
@@ -189,7 +189,7 @@ sen(x)
 x + raiz(9)
 x**2
 
-📦 Opção 5 – Exibir valores salvos
+Opção 5 – Exibir valores salvos
 
 Mostra todas as variáveis já definidas e seus valores formatados.
 
@@ -199,8 +199,8 @@ x = 3 - 2i
 y = 1.5
 z = -4i
 
-🛠️ Como o código funciona (visão geral)
-🔧 Implementações matemáticas feitas manualmente
+ Como o código funciona (visão geral)
+Implementações matemáticas feitas manualmente
 
 seno e coss → séries de Taylor
 
@@ -218,7 +218,7 @@ arctang → aproximação por séries + ajustes de quadrante
 
 ncomplexo → parser manual para strings complexas
 
-🧱 Parser
+Parser
 
 Implementa:
 
@@ -230,7 +230,7 @@ Construção da árvore Node
 
 Avaliação recursiva
 
-📌 Requisitos
+Requisitos
 
 Apenas Python padrão.
 Nenhuma biblioteca adicional é necessária.
