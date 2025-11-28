@@ -1,3 +1,23 @@
+import json
+import os
+
+ARQ_VAR = "variaveis.json"
+
+def volte():
+    if os.path.exists(ARQ_VAR):
+        try:
+            with open(ARQ_VAR, "r", encoding="utf-8") as f:
+                bruto = json.load(f)
+                return {k: ncomplexo(v) for k, v in bruto.items()}
+        except:
+            return {}
+    return {}
+
+
+def salvar_variaveis(variaveis):
+    texto = {k: format_complex(v) for k, v in variaveis.items()}
+    with open(ARQ_VAR, "w", encoding="utf-8") as f:
+        json.dump(texto, f, indent=4)
 print("== CALCULADORA CIENTÍFICA ==")
 print("== TRABALHO DO LINDO WELLIGTON ==")
 
@@ -223,7 +243,7 @@ class Node:
         self.esq = esq
         self.dir = dir
 
-variaveis = {}
+variaveis = volte()
 
 def tokenize(expr):
     expr = expr.strip()
