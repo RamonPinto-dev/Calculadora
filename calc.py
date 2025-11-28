@@ -14,7 +14,7 @@ def volte():
     return {}
 
 
-def salvar_variaveis(variaveis):
+def salvarvar(variaveis):
     texto = {k: format_complex(v) for k, v in variaveis.items()}
     with open(ARQ_VAR, "w", encoding="utf-8") as f:
         json.dump(texto, f, indent=4)
