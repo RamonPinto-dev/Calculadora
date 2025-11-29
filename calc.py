@@ -275,24 +275,34 @@ def ncomplexo(s):
     # caso seja apenas real
     else:
         return complex(float(s), 0)
-
+#  formata um número complexo em uma string legível
 def format_complex(c):
-    r = reduzir(c.real)
-    i = reduzir(abs(c.imag))
+    # função reduz dígitos que n precisam e trata casos especiais
+    # como parte real ou imaginária zero
+    r = reduzir(c.real) #formata real
+    i = reduzir(abs(c.imag)) #formata imagi magnetitude
+    # real
     if c.imag == 0:
         return r
+    # imagi
     if c.real == 0:
         sign = "-" if c.imag < 0 else ""
         return sign + i + "i"
+    # real+imagi
     sign = " - " if c.imag < 0 else " + "
     return f"({r}{sign}{i}i)"
 
 class Node:
+    # nó usada na arvore, Cada nó representa: um tipo (ex: 'NUM', 'OP', 'VAR')
+    # um valor (ex: número, operador, nome da variável)
+    #filhos esquerdo e direito (para operações binárias)   tipo num("NUM", valor=5) Node("OP",valor="+",esq=n1, dir=n2)
+    #isso permite ao interpretador percorrer a expressão e avaliá-la.
+
     def __init__(self, tipo, valor=None, esq=None, dir=None):
-        self.tipo = tipo
-        self.valor = valor
-        self.esq = esq
-        self.dir = dir
+        self.tipo = tipo # ex: 'NUM', 'OP', 'VAR'
+        self.valor = valor  # conteúdo do nó
+        self.esq = esq  #filho esquerdo
+        self.dir = dir #filho direito
 
 constantes = {}
 # pi e e adicionados como constante para a facilidade do usuário:
@@ -300,23 +310,36 @@ constantes["pi"] = PI
 constantes["e"] = expo(1)
 
 def tokenize(expr):
-    expr = expr.strip()
-    tokens = []
-    i = 0
+    # converte uma expressão matemática (string) em uma lista de tokens.
+    #  exemplo "3+5"  ["3", "+", "5"],
+    # essa função é usada pelo parser para montar a árvore  
+    # regras importantes:
+    # ignora espaços
+    # converte ^ para ** (potência)
+    # reconhece operadores: +, -, *, /, (, )
+    # reconhece funções como sen, cos, tan, ln, log10, raiz, conj
+    expr = expr.strip() # remove espaços do início e fim
+    tokens = [] # lista de tokens que será retornada
+    i = 0  # indice atual na string 
+     # lista das funções reconhecidas pelo parser
     funcs = ["sen","cos","tan","ln","log10","raiz","conj"]
     while i < len(expr):
         ch = expr[i]
+        # ignora espaços dentro da expressão
         if ch.isspace():
             i += 1
             continue
+        # detecta operador de potência "**" diretamente na string
         if expr.startswith("**", i):
             tokens.append("**")
             i += 2
             continue
+         # permite "^" como potencia, convertendo para "**"
         if ch == "^":
             tokens.append("**")
             i += 1
             continue
+         # operadores simples e parênteses
         if ch in "+-*/()":
             tokens.append(ch)
             i += 1
