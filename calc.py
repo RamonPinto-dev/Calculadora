@@ -483,10 +483,42 @@ def mostrar_lisp_substituido(node, valores_substituidos=None):
     
     return f"({node.valor} {mostrar_lisp_substituido(node.esq, valores_substituidos)} {mostrar_lisp_substituido(node.dir, valores_substituidos)})"
 
+# Função de igualdade, compara os nós de forma recursiva:
 def igual(a,b):
-    va, _ = evaluate(a)
-    vb, _ = evaluate(b)
-    return format_complex(va) == format_complex(vb)
+
+    # Se os dois nós forem None, são iguais:
+    if a is None and b is None:
+        return True
+    
+    # Se um nó for None e outro não, são diferentes:
+    if a is None or b is None:
+        return False
+    
+    # Se os tipos de nó são diferente, são diferente:
+    if a.tipo != b.tipo:
+        return False
+    
+    # Se os valores forem diferentes, são difernetes:
+    if a.valor != b.valor:
+        return False
+    
+    # Para o números, se compara o valor complexo de ambos diretamente:
+    if a.tipo == "num":
+        return a.valor == b.valor
+    
+    # Para variáveis, se compara o nome:
+    if a.tipo == "var":
+        return a.valor == b.valor
+    
+    # Para operações unárias, se compara as próprias operações e os seus argumentos:
+    if a.tipo == "func":
+        return a.valor == b.valor and igual(a.esq, b.esq)
+    
+    # Para operações binárias, mesma coisa mas com ambos argumentos:
+    if a.tipo == "op":
+        return igual(a.esq, b.esq) and igual(a.dir, b.dir)
+    
+    return False
 
 while True:
     print("""
@@ -549,7 +581,7 @@ while True:
                 print("Erro: divisão por zero")
             except Exception as e:
                 print("Erro:", e)
-                # Basicamente inutinizavel agora/ Seria bom mudar esse case para Nome da Cosntante
+                #Basicamente inutinizavel agora/ Seria bom mudar esse case para Nome da Cosntante
         case "4":
             nome = input("Nome da constante: ").strip()
 
