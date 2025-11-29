@@ -436,22 +436,23 @@ def evaluate(node, valores_substituidos=None):
             elif expoente.real > 0:
                 resultado = complex(0, 0)
             
-            # ...e o expoente for 0, invalido:
+            # ...e o expoente for negativo, invalido:
             else:
                 raise ValueError("Invalido (divisão por 0)")
         
-        # ln(z) = ln(r) + i*theta, como já estabelecido (na função logn)
-        magnitude = raizQ(base.real*base.real + base.imag*base.imag) 
-        theta = arctang(base.imag, base.real)
-    
-        # w * ln(z) = (a + bi) * (ln(r) + iθ) = a*ln(r) + a*theta*i + ln(r)*b*i + b*theta*i*i =
-        # a*ln(r) + a*theta*i + ln(r)*b*i - b*theta = (a*ln(r) - b*theta) + i*(a*theta + b*ln(r))
-        expoente_real = expoente.real * logn(magnitude) - expoente.imag * theta
-        expoente_imag = expoente.real * theta + expoente.imag * logn(magnitude)
-        expoente = complex(expoente_real, expoente_imag)
+        else:
+            # ln(z) = ln(r) + i*theta, como já estabelecido (na função logn)
+            magnitude = raizQ(base.real*base.real + base.imag*base.imag) 
+            theta = arctang(base.imag, base.real)
+        
+            # w * ln(z) = (a + bi) * (ln(r) + iθ) = a*ln(r) + a*theta*i + ln(r)*b*i + b*theta*i*i =
+            # a*ln(r) + a*theta*i + ln(r)*b*i - b*theta = (a*ln(r) - b*theta) + i*(a*theta + b*ln(r))
+            expoente_real = expoente.real * logn(magnitude) - expoente.imag * theta
+            expoente_imag = expoente.real * theta + expoente.imag * logn(magnitude)
+            expoente = complex(expoente_real, expoente_imag)
 
-        # Finalmente calcular e^(w*ln(z)):
-        resultado = expo(expoente)
+            # Finalmente calcular e^(w*ln(z)):
+            resultado = expo(expoente)
 
     else:
         raise ValueError("Operador inválido")
