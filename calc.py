@@ -238,6 +238,10 @@ def tokenize(expr):
             tokens.append("**")
             i += 2
             continue
+        if ch == "^":
+            tokens.append("**")
+            i += 1
+            continue
         if ch in "+-*/()":
             tokens.append(ch)
             i += 1
@@ -340,10 +344,17 @@ def evaluate(node, valores_substituidos=None):
     if node.tipo == "num":
         return node.valor, valores_substituidos
     
+    # Variáveis:
     if node.tipo == "var":
         nome = node.valor
+
+        # Checar se o valor da variável já não foi registrada pelo usuário (para evitar que o programa interprete os 2 x em "x + x" como variáveis diferentes, por exemplo)
+        if nome in valores_substituidos:
+            return valores_substituidos[nome], valores_substituidos
+
         # Pede entrada de valor da variável:
         entrada = input(f"Valor da variável {nome}: ")
+
         try:
             val = ncomplexo(entrada)
         except:
@@ -538,7 +549,7 @@ while True:
                 print("Erro: divisão por zero")
             except Exception as e:
                 print("Erro:", e)
-                #Basicamente inutinizavel agora/ Seria bom mudar esse case para Nome da Cosntante
+                # Basicamente inutinizavel agora/ Seria bom mudar esse case para Nome da Cosntante
         case "4":
             nome = input("Nome da constante: ").strip()
 
