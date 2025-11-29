@@ -1,25 +1,4 @@
-import json
-import os
-
-ARQ_VAR = "variaveis.json"
-
-def volte():
-    if os.path.exists(ARQ_VAR):
-        try:
-            with open(ARQ_VAR, "r", encoding="utf-8") as f:
-                bruto = json.load(f)
-                return {k: ncomplexo(v) for k, v in bruto.items()}
-        except:
-            return {}
-    return {}
-
-
-def salvarvar(variaveis):
-    texto = {k: format_complex(v) for k, v in variaveis.items()}
-    with open(ARQ_VAR, "w", encoding="utf-8") as f:
-        json.dump(texto, f, indent=4)
-print("== CALCULADORA CIENTÍFICA ==")
-print("== TRABALHO DO LINDO WELLIGTON ==")
+print("== CALCULADORA CIENTÍFICA COMPLEXA ==")
 
 PI = 3.141592653589793
 
@@ -243,7 +222,7 @@ class Node:
         self.esq = esq
         self.dir = dir
 
-variaveis = volte()
+constantes = {}
 
 def tokenize(expr):
     expr = expr.strip()
@@ -343,8 +322,7 @@ def nparser(expr):
         if tok == "-":
             nodo = nfator()
             return Node("op","*", Node("num", complex(-1,0)), nodo)
-        if tok in variaveis:
-            return Node("num", variaveis[tok])
+        
         try:
             val = ncomplexo(tok)
             return Node("num", val)
@@ -355,22 +333,26 @@ def nparser(expr):
         raise ValueError("Tokens sobrando / sintaxe inválida")
     return node
 
-def evaluate(node):
+def evaluate(node, valores_substituidos=None):
+    if valores_substituidos is None:
+        valores_substituidos = {}
+
     if node.tipo == "num":
-        return node.valor
+        return node.valor, valores_substituidos
+    
     if node.tipo == "var":
         nome = node.valor
-        if nome in variaveis:
-            return variaveis[nome]
+        # Pede entrada de valor da variável:
         entrada = input(f"Valor da variável {nome}: ")
         try:
             val = ncomplexo(entrada)
         except:
-            raise ValueError("Valor de variável inválido")
-        variaveis[nome] = val
-        return val
+            raise ValueError(f"Valor inválido para variável '{nome}'")
+        valores_substituidos[nome] = val
+        return val, valores_substituidos
+    
     if node.tipo == "func":
-        arg = evaluate(node.esq)
+        arg, valores_substituidos = evaluate(node.esq, valores_substituidos)
         funcoes = {
             "sen": lambda x: seno(x),
             "cos": lambda x: coss(x),
@@ -382,17 +364,18 @@ def evaluate(node):
         }
         if node.valor not in funcoes:
             raise ValueError("Função inexistente")
-        return funcoes[node.valor](arg)
+        return funcoes[node.valor](arg), valores_substituidos
     
     # Operadores binários:
-    esquerda = evaluate(node.esq)
-    direita = evaluate(node.dir)
+    esquerda, valores_substituidos = evaluate(node.esq, valores_substituidos)
+    direita, valores_substituidos = evaluate(node.dir, valores_substituidos)
+
     if node.valor == "+":
         # (a + bi) + (c + di) = (a + c) + (bi + di):
-        return complex(esquerda.real + direita.real, esquerda.imag + direita.imag)
+        resultado = complex(esquerda.real + direita.real, esquerda.imag + direita.imag)
     elif node.valor == "-":
         # (a + bi) + (c + di) = (a - c) + (bi - di):
-        return complex(esquerda.real - direita.real, esquerda.imag - direita.imag)
+        resultado = complex(esquerda.real - direita.real, esquerda.imag - direita.imag)
     
     elif node.valor == "*":
         # Distributiva:
@@ -400,7 +383,7 @@ def evaluate(node):
         # ac - bd + adi + bci = (ac - bd) + (ad + bc)i
         real = esquerda.real * direita.real - esquerda.imag * direita.imag
         imag = esquerda.real * direita.imag + esquerda.imag * direita.real
-        return complex(real, imag)
+        resultado = complex(real, imag)
     
     elif node.valor == "/":
         # (a+bi)/(c+di) = (a+bi)/(c+di) * (c-di)/(c-di) = (ac - adi + bci - bdi*i)/(c^2 - cdi + cdi - d^2*i^2) =
@@ -412,7 +395,7 @@ def evaluate(node):
         denominador = direita.real**2 + direita.imag**2
         real = (esquerda.real * direita.real + esquerda.imag * direita.imag) / denominador
         imag = (esquerda.imag * direita.real - esquerda.real * direita.imag) / denominador
-        return complex(real, imag)
+        resultado = complex(real, imag)
     
     elif node.valor == "**":
         # Potência complexa. Para isto se utiliza esta formula baseada na formula de Euler: z^w = e^(w*ln(z))
@@ -424,11 +407,11 @@ def evaluate(node):
 
             # ...e o expoente também for 0, retorna 1, por convenção.
             if expoente.real == 0 and expoente.imag == 0:
-                return complex(1, 0)
+                resultado = complex(1, 0)
             
             # ...e o expoente for positivo, retorna 0.
             elif expoente.real > 0:
-                return complex(0, 0)
+                resultado = complex(0, 0)
             
             # ...e o expoente for 0, invalido:
             else:
@@ -445,27 +428,53 @@ def evaluate(node):
         expoente = complex(expoente_real, expoente_imag)
 
         # Finalmente calcular e^(w*ln(z)):
-        return expo(expoente)
+        resultado = expo(expoente)
 
     else:
         raise ValueError("Operador inválido")
+    
+    return resultado, valores_substituidos
+
     try:
         return ops[node.valor](esquerda,direita)
     except ZeroDivisionError:
         raise ZeroDivisionError("Divisão por zero")
 
+# Função que monta a notação LISP:
 def mostrar_lisp(node):
     if node.tipo == "num":
         return format_complex(node.valor)
+    
     if node.tipo == "var":
         return node.valor
+    
     if node.tipo == "func":
         return f"({node.valor} {mostrar_lisp(node.esq)})"
+    
     return f"({node.valor} {mostrar_lisp(node.esq)} {mostrar_lisp(node.dir)})"
 
+# Na função acima, a notação LISP montada utiliza os nomes das variaveis e constants (ex: (+ x y)), aqui faz outra notação onde seus valores são mostrados para o usuário:
+def mostrar_lisp_substituido(node, valores_substituidos=None):
+    if valores_substituidos is None:
+        valores_substituidos = {}
+    
+    if node.tipo == "num":
+        return format_complex(node.valor)
+    
+    # Variaveis e constants substituidos pelo seus valores:
+    if node.tipo == "var":
+        if node.valor in valores_substituidos:
+            return format_complex(valores_substituidos[node.valor])
+        return node.valor
+    
+    if node.tipo == "func":
+        return f"({node.valor} {mostrar_lisp_substituido(node.esq, valores_substituidos)})"
+    
+    return f"({node.valor} {mostrar_lisp_substituido(node.esq, valores_substituidos)} {mostrar_lisp_substituido(node.dir, valores_substituidos)})"
+
 def igual(a,b):
-    va = evaluate(a)
-    vb = evaluate(b)
+    va, _ = evaluate(a)
+    vb, _ = evaluate(b)
     return format_complex(va) == format_complex(vb)
 
 while True:
@@ -473,8 +482,9 @@ while True:
 1 - Porcentagem
 2 - Expressão aritmética
 3 - Verificação de igualdade
-4 - Definir variável
-5 - Exibir valores salvos
+4 - Definir constante
+5 - Exibir constantes salvas
+6 - Deletar constants
 "_" - Sair""")
     op = input("Escolha a opção: ")
     if op.lower() == "_":
@@ -504,7 +514,8 @@ while True:
             try:
                 arv = nparser(expr)
                 print("Árvore LISP:", mostrar_lisp(arv))
-                res = evaluate(arv)
+                res, valores_substituidos = evaluate(arv)
+                print("Árvore LISP:", mostrar_lisp_substituido(arv, valores_substituidos))
                 print("Resultado:", format_complex(res))
             except ZeroDivisionError:
                 print("Erro: divisão por zero")
@@ -526,25 +537,41 @@ while True:
                 print("Erro:", e)
                 #Basicamente inutinizavel agora/ Seria bom mudar esse case para Nome da Cosntante
         case "4":
-            nome = input("Nome da variável: ").strip()
+            nome = input("Nome da constante: ").strip()
 
             if not nome.isalpha():
-                print("Erro: Nome de variável deve ter apenas letras.")
+                print("Erro: Nome de constante deve ter apenas letras.")
                 continue
 
             expr = input("Valor: ")
 
             try:
                 arv = nparser(expr)          
-                val = evaluate(arv)          
-                variaveis[nome] = val        
-                print(f"Variável '{nome}' foi definida como {format_complex(val)}")
+                val, _ = evaluate(arv)          
+                constantes[nome] = val        
+                print(f"Constante '{nome}' foi definida como {format_complex(val)}")
             except Exception as e:
-                print("Erro ao definir variável:", e)
+                print("Erro ao definir constante: ", e)
         case "5":
-            if not variaveis:
-                print("Nenhuma variável salva.")
+            if not constantes:
+                print("Nenhuma constante salva.")
             else:
-                print("VARIÁVEIS SALVAS:")
-                for nome, valor in variaveis.items():
+                print("CONSTANTES SALVAS:")
+                for nome, valor in constantes.items():
                     print(f"{nome} = {format_complex(valor)}")
+        
+        case "6":
+            if not constantes:
+                print("Nenhuma constante salva para deletar.")
+                continue
+                
+            print("Constantes disponíveis:")
+            for nome in constantes.keys():
+                print(f"- {nome}")
+                
+            nome = input("Nome da constante a deletar: ").strip()
+            if nome in constantes:
+                del constantes[nome]
+                print(f"Constante '{nome}' deletada.")
+            else:
+                print(f"Constante '{nome}' não encontrada.")
