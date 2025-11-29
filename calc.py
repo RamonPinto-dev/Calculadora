@@ -217,7 +217,9 @@ def raizQ(x):
 
 def conj(x):
     return complex(x.real, -x.imag)
-
+# Retorna conjugado de um número complexo.
+    # se x = a + bi → retorna a - bi
+    
 def reduzir(x):
     if abs(x) < 0.001 and x != 0:
         return f"{x:.6f}".rstrip("0").rstrip(".")
@@ -225,30 +227,44 @@ def reduzir(x):
         return f"{x:.6f}".rstrip("0").rstrip(".")
     else:
         return f"{x:.6f}".rstrip("0").rstrip(".")
+ #  Formata números deixando até 6 casas decimais
+    # removendo zeros desnecessários.
 
 def ncomplexo(s):
+    # Converte uma string em número complexo manualmente,
+    # sem usar bibliotecas de fora, aceita formas ex. 5,-3,2.5,4i,-i,3+4i etc.
+    # Lida com: sinais positivos e negativos,números com parte real, imaginária ou ambas
+    # formato “i” ao invés de “j”
+    
+        # limpeza básica da string
     s = s.strip().replace(" ", "").lower()
     if s == "":
         raise ValueError("Entrada vazia")
     s = s.replace("j", "i")
+     # valores simples
     if s == "i":
         return complex(0, 1)
     if s == "-i":
         return complex(0, -1)
+    # valores com parte imagi
     if "i" in s:
+         # procura o último + ou - que separa real e imagi
         idx = -1
         for i, ch in enumerate(s[:-1], start=0): 
             if (ch == "+" or ch == "-") and i != 0:
                 idx = i
+        # caso tenha parte real + imaginária
         if idx != -1:
             real_part = s[:idx]
             imag_part = s[idx:-1]  
             real_val = float(real_part) if real_part not in ("", "+", "-") else (0.0 if real_part=="" else float(real_part))
+             # lida com casos como "2+i" e "2-i"
             if imag_part in ("+", "-"):
                 imag_val = 1.0 if imag_part == "+" else -1.0
             else:
                 imag_val = float(imag_part)
             return complex(real_val, imag_val)
+         # formato apenas imagi
         else:
             base = s[:-1]
             if base in ("", "+"):
@@ -256,6 +272,7 @@ def ncomplexo(s):
             if base == "-":
                 return complex(0, -1)
             return complex(0, float(base))
+    # caso seja apenas real
     else:
         return complex(float(s), 0)
 
@@ -631,7 +648,7 @@ while True:
 3 - Verificação de igualdade
 4 - Definir constante
 5 - Exibir constantes salvas
-6 - Deletar constants
+6 - Deletar constantes
 "_" - Sair""")
     op = input("Escolha a opção: ")
     if op.lower() == "_":
