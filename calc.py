@@ -246,6 +246,18 @@ def tokenize(expr):
             tokens.append(ch)
             i += 1
             continue
+
+        variantes_raiz = ["sqrt", "raizq", "raizQ", "v"]
+        matched_raiz = False
+        for variante in variantes_raiz:
+            if expr.startswith(variante, i):
+                tokens.append("raiz")  # <- normalizer para "raiz"
+                i += len(variante)
+                matched_raiz = True
+                break
+        if matched_raiz:
+            continue
+        
         matched = False
         for f in funcs:
             if expr.startswith(f, i):
@@ -581,7 +593,7 @@ while True:
                 print("Erro: divisão por zero")
             except Exception as e:
                 print("Erro:", e)
-                #Basicamente inutinizavel agora/ Seria bom mudar esse case para Nome da Cosntante
+                # Basicamente inutinizavel agora/ Seria bom mudar esse case para Nome da Cosntante
         case "4":
             nome = input("Nome da constante: ").strip()
 
