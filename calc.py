@@ -164,8 +164,12 @@ def logn(x):
             raise ValueError("ln não funciona em zero")
         if x == 1:
             return 0
-        if abs(x - 2.718281828459045) < 1e-10:  # Ou seja, se x = e
+        if abs(x - 2.718281828459045) < TOLERANCIA_TAYLOR:  # Ou seja, se x = e
             return 1
+        
+        # Reduzindo o argumento para ter melhor precisão, usando a propriedade de que log(x) = -log(1/x). Neste caso, para quando 1/x > 0.5
+        if x > 2:
+            return -logn(1/x)
         
         y = x - 1
         for _ in range(TERMOS_TAYLOR):
