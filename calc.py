@@ -515,7 +515,10 @@ while True:
                 arv = nparser(expr)
                 print("Árvore LISP:", mostrar_lisp(arv))
                 res, valores_substituidos = evaluate(arv)
-                print("Árvore LISP:", mostrar_lisp_substituido(arv, valores_substituidos))
+
+                if valores_substituidos:
+                    print("Árvore LISP:", mostrar_lisp_substituido(arv, valores_substituidos))
+                
                 print("Resultado:", format_complex(res))
             except ZeroDivisionError:
                 print("Erro: divisão por zero")
