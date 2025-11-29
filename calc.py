@@ -1,6 +1,11 @@
 print("== CALCULADORA CIENTÍFICA COMPLEXA ==")
 
+# Constante para pi:
 PI = 3.141592653589793
+# Constantes que auxiliam na Série de Taylor:
+LIMITE_TAYLOR = 100  # O máximo número pelo qual se vai fazer a Série de Taylor (para ter cuidado com o overflow)
+TERMOS_TAYLOR = 1000   # Quantidade de termos utilizados na série
+TOLERANCIA_TAYLOR = 1e-10  # Como os termos da Série de Taylor vão ficando cada vez menores, tinha uma hora que ele atrapalhava a redudância (ex 511.999 em vez de 512), daí esta "tolerância" para parar a série quando um termo for menor que ela se fez necessário
 
 def seno(g):
     # Números complexos:
@@ -9,13 +14,17 @@ def seno(g):
         parte_real = seno(g.real) * cossh(g.imag)
         parte_imag = coss(g.real) * senoh(g.imag)
         return complex(parte_real, parte_imag)
+    
     # Números reais (Série de Taylor):
     else:
         soma = 0
         termo = g
-        for n in range(1, 15):
+        for n in range(1, TERMOS_TAYLOR):
             soma += termo
             termo *= -g*g / ((2*n) * (2*n+1))
+
+            if abs(termo) < TOLERANCIA_TAYLOR:
+                break
         return soma
 
 def coss(g):
@@ -25,13 +34,17 @@ def coss(g):
         parte_real = coss(g.real) * cossh(g.imag)
         parte_imag = - seno(g.real) * senoh(g.imag)
         return complex(parte_real, parte_imag)
+    
     # Números reais (Série de Taylor):
     else:
         soma = 1
         termo = 1
-        for n in range(1, 15):
+        for n in range(1, TERMOS_TAYLOR):
             termo *= -g*g / ((2*n-1) * (2*n))
             soma += termo
+            if abs(termo) < TOLERANCIA_TAYLOR:
+                break
+
         return soma
 
 def tang(g):
@@ -53,11 +66,15 @@ def cossh(g):
 def arctang_taylor(g):
     if abs(g) > 1:
         return (PI/2) - arctang_taylor(1/g)
+    
     soma = 0
     termo = g
-    for n in range(0, 20):
+    
+    for n in range(0, TERMOS_TAYLOR):
         soma += termo / (2*n + 1)
         termo *= -g*g
+        if abs(termo) < TOLERANCIA_TAYLOR:
+            break
     return soma
 
 def arctang(b, a):
@@ -75,8 +92,6 @@ def arctang(b, a):
             return -PI/2
         else:
             raise ValueError("Invalido (divisão por 0)")
-            
-
 
 def expo(x):
     # Se o número for complexo:
@@ -88,13 +103,37 @@ def expo(x):
         parte_imag = magnitude * seno(x.imag)
         return complex(parte_real, parte_imag)
     
-    # Série de Taylor para numero real:
+    # Se o número for real:
     else:
+        # Casos de e^0 (1), e^1 (e) e e^-1 (1/e):
+        if x == 0: 
+            return 1
+        if x == 1: 
+            return 2.718281828459045
+        if x == -1: 
+            return 0.36787944117144233
+        
+        # Quando x for muito grande, se utiliza uma propridade da exponenciação para "partir" o número entre duas séries...
+        # e^(a + b) = e^a * e^b -> e^(a) = e^(b + (a - b)) = e^(b) * e^(a - b)
+        if x > LIMITE_TAYLOR:
+            # e^x = e^LIMITE_TAYLOR * e^(x - LIMITE_TAYLOR)
+            return expo(LIMITE_TAYLOR) * expo(x - LIMITE_TAYLOR)
+        elif x < -LIMITE_TAYLOR:
+            # e^x = e^(-LIMITE_TAYLOR) * e^(x + LIMITE_TAYLOR)  
+            return expo(-LIMITE_TAYLOR) * expo(x + LIMITE_TAYLOR)
+        # A "partição" acima faz com que, em vez de se computar e^1000 diretamente e dar um número errado, se compute e^100 * e^900 (e e^900 como e^100 * e^800 e por aí vai)
+        
         soma = 1
-        term = 1
-        for i in range(1, 20):
-            term *=  x/i
-            soma += term
+        termo = 1
+
+        for i in range(1, TERMOS_TAYLOR):
+            termo *=  x/i
+            soma += termo
+
+            # Rompe o loop se o termo ficar muito pequeno:
+            if abs(termo) < TOLERANCIA_TAYLOR:
+                break
+
         return soma
 
 def logn(x):
@@ -123,9 +162,16 @@ def logn(x):
     else:
         if x == 0:
             raise ValueError("ln não funciona em zero")
+        if x == 1:
+            return 0
+        if abs(x - 2.718281828459045) < 1e-10:  # Ou seja, se x = e
+            return 1
+        
         y = x - 1
-        for _ in range(20):
+        for _ in range(TERMOS_TAYLOR):
             y -= (expo(y) - x) / expo(y)
+            if abs(y) < TOLERANCIA_TAYLOR:
+                break
         return y
 
 def log10(x):
@@ -169,7 +215,12 @@ def conj(x):
     return complex(x.real, -x.imag)
 
 def reduzir(x):
-    return f"{x:.3f}".rstrip("0").rstrip(".")
+    if abs(x) < 0.001 and x != 0:
+        return f"{x:.6f}".rstrip("0").rstrip(".")
+    elif abs(x) < 1:
+        return f"{x:.6f}".rstrip("0").rstrip(".")
+    else:
+        return f"{x:.6f}".rstrip("0").rstrip(".")
 
 def ncomplexo(s):
     s = s.strip().replace(" ", "").lower()
@@ -223,6 +274,9 @@ class Node:
         self.dir = dir
 
 constantes = {}
+# pi e e adicionados como constante para a facilidade do usuário:
+constantes["pi"] = PI
+constantes["e"] = expo(1)
 
 def tokenize(expr):
     expr = expr.strip()
@@ -326,6 +380,8 @@ def nparser(expr):
             if not tokens or tokens.pop(0) != ")":
                 raise ValueError("Parêntese não fechado")
             return node
+        if tok in constantes:
+            return Node("num", constantes[tok])
         if tok in ["sen","cos","tan","ln","log10","raiz","conj"]:
             if not tokens or tokens.pop(0) != "(":
                 raise ValueError("Falta parêntese pós função")
@@ -430,29 +486,60 @@ def evaluate(node, valores_substituidos=None):
 
             # ...e o expoente também for 0, retorna 1, por convenção.
             if expoente.real == 0 and expoente.imag == 0:
-                resultado = complex(1, 0)
+                resultado = 1
             
             # ...e o expoente for positivo, retorna 0.
             elif expoente.real > 0:
-                resultado = complex(0, 0)
+                resultado = 0
             
             # ...e o expoente for negativo, invalido:
             else:
                 raise ValueError("Invalido (divisão por 0)")
         
         else:
-            # ln(z) = ln(r) + i*theta, como já estabelecido (na função logn)
-            magnitude = raizQ(base.real*base.real + base.imag*base.imag) 
-            theta = arctang(base.imag, base.real)
-        
-            # w * ln(z) = (a + bi) * (ln(r) + iθ) = a*ln(r) + a*theta*i + ln(r)*b*i + b*theta*i*i =
-            # a*ln(r) + a*theta*i + ln(r)*b*i - b*theta = (a*ln(r) - b*theta) + i*(a*theta + b*ln(r))
-            expoente_real = expoente.real * logn(magnitude) - expoente.imag * theta
-            expoente_imag = expoente.real * theta + expoente.imag * logn(magnitude)
-            expoente = complex(expoente_real, expoente_imag)
+            # E expoente for inteiro...
+            if (expoente.imag == 0 and expoente.real != 0 and abs(expoente.real - round(expoente.real)) < TOLERANCIA_TAYLOR):
+                # Faz a multiplicação:
+                n = int(round(expoente.real))
+                if n == 0:
+                    resultado = 1
+                elif n == 1:
+                    resultado = base
 
-            # Finalmente calcular e^(w*ln(z)):
-            resultado = expo(expoente)
+                elif n > 0:
+                    resultado = complex(1, 0)  # Começa com 1...
+                    
+                    # Repetir n vezes:
+                    for _ in range(n):
+                        # Multiplica resultado * base; a*c - b*d, a*d + b*c
+                        resultado = complex(resultado.real*base.real - resultado.imag*base.imag, resultado.real*base.imag + resultado.imag*base.real)
+                
+                else: # n < 0
+                    resultado = complex(1, 0)  # Começa com 1...
+                    
+                    # Repetir n vezes:
+                    for _ in range(abs(n)):
+                        # Multiplica resultado * base; a*c - b*d, a*d + b*c
+                        resultado = complex(resultado.real*base.real - resultado.imag*base.imag, resultado.real*base.imag + resultado.imag*base.real)
+                        
+                    # Fazer o reciproco (1/resultado):
+                    denom = resultado.real*resultado.real + resultado.imag*resultado.imag
+                    resultado = complex(resultado.real/denom, -resultado.imag/denom)
+            
+            # Se o expoente for real ou complexo:
+            else:
+                # ln(z) = ln(r) + i*theta, como já estabelecido (na função logn)
+                magnitude = raizQ(base.real*base.real + base.imag*base.imag) 
+                theta = arctang(base.imag, base.real)
+            
+                # w * ln(z) = (a + bi) * (ln(r) + iθ) = a*ln(r) + a*theta*i + ln(r)*b*i + b*theta*i*i =
+                # a*ln(r) + a*theta*i + ln(r)*b*i - b*theta = (a*ln(r) - b*theta) + i*(a*theta + b*ln(r))
+                expoente_real = expoente.real * logn(magnitude) - expoente.imag * theta
+                expoente_imag = expoente.real * theta + expoente.imag * logn(magnitude)
+                expoente = complex(expoente_real, expoente_imag)
+
+                # Finalmente calcular e^(w*ln(z)):
+                resultado = expo(expoente)
 
     else:
         raise ValueError("Operador inválido")
