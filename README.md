@@ -29,7 +29,7 @@ Potenciação complexa
 
 Um parser próprio de expressões
 
-Avaliação de expressões com variáveis
+Avaliação de expressões com constantes
 
 Tudo foi implementado manualmente, sem usar bibliotecas matemáticas prontas (math, cmath, etc), incluindo séries de Taylor, Euler, e aritmética complexa completa.
 
@@ -68,9 +68,9 @@ Funções trigonométricas e exponenciais funcionam para complexos
 
 Potenciação complexa usando z^w = e^(w·ln(z))
 
-Variáveis
+constantes
 
-O usuário pode definir variáveis (x, y, a, etc)
+O usuário pode definir constantes (x, y, a, etc)
 
 Podem ser usadas em qualquer expressão
 
@@ -97,8 +97,9 @@ Ao rodar o programa, você verá o menu:
 1 - Porcentagem
 2 - Expressão aritmética
 3 - Verificação de igualdade
-4 - Definir variável
-5 - Exibir valores salvos
+4 - Definir constante
+5 - Exibir constantes salvas
+6 - Deletar constantes
 "_" - Sair
 
 Opção 1 – Porcentagem
@@ -139,13 +140,13 @@ Complexos
 4-i
 -7i
 
-Variáveis
+constantes
 x
 a
 beta
 
 
-Se você usar uma variável ainda não definida, o programa perguntará seu valor.
+Se você usar uma constante ainda não definida, o programa perguntará seu valor.
 
 Exemplos válidos:
 3+2i
@@ -173,13 +174,13 @@ Expr 2: a+2
 
 Funciona inclusive com funções e complexos.
 
-Opção 4 – Definir variável
+Opção 4 – Definir constantes
 
-Cria uma variável e atribui um valor.
+Cria uma constante e atribui um valor.
 
 Exemplo:
 
-Nome da variável: x
+Nome da constante: x
 Valor: 3-2i
 
 
@@ -191,7 +192,7 @@ x**2
 
 Opção 5 – Exibir valores salvos
 
-Mostra todas as variáveis já definidas e seus valores formatados.
+Mostra todas as constantes já definidas e seus valores formatados.
 
 Exemplo:
 
