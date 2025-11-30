@@ -1,98 +1,136 @@
-Projeto A3 - Calculadora Científica de Números Complexos
+Projeto A3 — Calculadora Científica de Números Complexos
 
-Professor: Wellington Lacerda Silveira da Silva
 Disciplina: Estrutura de Dados e Análise de Algoritmos
+Professor: Wellington Lacerda Silveira da Silva
 
-Integrantes do Grupo
+Integrantes
 
-Breno Dantas Oliveira Filho – RA: 1272417582
+Breno Dantas Oliveira Filho — RA: 1272417582
 
-Ramon Queiroz G. Pinto – RA: 12724126768
+Ramon Queiroz G. Pinto — RA: 12724126768
 
-Adrian Ferreira Andrade – RA: 12724133589
+Adrian Ferreira Andrade — RA: 12724133589
 
-Calculadora Científica — A3 - 2025 
+Descrição do Projeto
 
-Este projeto é uma calculadora científica com suporte completo a números complexos, incluindo:
+Esta calculadora científica foi inteiramente desenvolvida sem o uso de bibliotecas matemáticas prontas como math ou cmath.
+Todas as operações são implementadas manualmente, incluindo:
 
-Aritmética básica
+Séries de Taylor
 
-Funções trigonométricas reais e complexas
+Fórmulas de Euler
 
-Logaritmos
+Trigonometria hiperbolica
 
-Exponenciais
+Aproximações iterativas
 
-Raiz quadrada complexa
+Aritmética completa com números complexos
 
-Potenciação complexa
+Sistema de parsing com geração de árvore sintática (AST)
 
-Um parser próprio de expressões
+A calculadora é capaz de interpretar expressões matemáticas completas com números reais, complexos, funções científicas e constantes criadas pelo usuário.
 
-Avaliação de expressões com constantes
+Funcionalidades
+Operações básicas
 
-Tudo foi implementado manualmente, sem usar bibliotecas matemáticas prontas (math, cmath, etc), incluindo séries de Taylor, Euler, e aritmética complexa completa.
+Soma: +
 
-Funcionalidades Principais
-Operações 
+Subtração: -
 
-Soma +
+Multiplicação: *
 
-Subtração -
+Divisão: /
 
-Multiplicação *
+Potência: **
 
-Divisão /
+Raiz quadrada complexa: raiz(x)
 
-Potência **
+Conjugado: conj(x)
 
-Raiz quadrada: raiz()
+Funções científicas
 
-Conjugado: conj()
+Seno: sen(x)
 
-seno: sen() radiano
+Cosseno: cos(x)
 
-cosseno: cos() radiano
+Tangente: tan(x)
 
-tangente: tan() radiano
+Exponencial: e^(x) (via expo())
 
-logaritmo: ln()
+Logaritmo natural: ln(x)
 
-logaritmo base 10: log10()
+Logaritmo base 10: log10(x)
 
-Suporte total a números complexos
+Todas as funções funcionam tanto para reais quanto complexos.
 
-Entrada no formato: a+bi, a-bi, 3i, -7i, 5, etc
+Números Complexos
 
-Funções trigonométricas e exponenciais funcionam para complexos
+Entrada aceita:
 
-Potenciação complexa usando z^w = e^(w·ln(z))
+3+2i
+4-i
+-7i
+5
+0+3i
 
-constantes
 
-O usuário pode definir constantes (x, y, a, etc)
+As operações implementadas manualmente incluem:
 
-Podem ser usadas em qualquer expressão
+soma/subtração real e imaginária
 
-Podem armazenar números ou complexos
+multiplicação e divisão
 
-Ficam salvas durante a execução
+potência usando:
 
-Sistema próprio de parsing
+z^w = e^(w · ln(z))
 
-O programa:
 
-Tokeniza
+trigonometria complexa
 
-Constrói uma árvore sintática (AST)
+exponenciais complexas
 
-Mostra a árvore no formato LISP
+logs complexos via forma polar
 
-Avalia recursivamente
+Sistema de Constantes
 
-Como usar a calculadora
+O usuário pode definir constantes como:
 
-Ao rodar o programa, você verá o menu:
+x = 3-2i
+k = 5
+beta = -4i
+
+
+Elas podem ser usadas em qualquer expressão:
+
+sen(x)
+x + raiz(9)
+(3+2i)**(1-i)
+
+
+As constantes ficam salvas até o usuário apagá-las.
+
+Parser de Expressões
+
+Totalmente feito do zero:
+
+Tokenização manual
+
+Precedência correta de operadores
+
+Suporte a parênteses e funções
+
+Construção da Árvore Sintática (AST)
+
+Impressão no formato LISP, exemplo:
+
+(+ 3 (* 2 i))
+
+
+Avaliação recursiva do AST
+
+Menu do Programa
+
+Ao iniciar, o usuário vê:
 
 1 - Porcentagem
 2 - Expressão aritmética
@@ -102,53 +140,37 @@ Ao rodar o programa, você verá o menu:
 6 - Deletar constantes
 "_" - Sair
 
-Opção 1 – Porcentagem
-
-Digite um número e depois uma porcentagem.
+1 — Porcentagem
 
 Exemplo:
 
-número = 200
-porcentagem = 10
-resultado = 20
+número: 200
+porcentagem: 10
+→ 20
 
 
-Funciona também com complexos:
+Funciona com complexos:
 
-número = 10+5i
-porcentagem = 50
-resultado = 5+2.5i
+10+5i com 50% → 5+2.5i
 
-Opção 2 – Expressão aritmética
+2 — Expressão Aritmética
 
-Você pode digitar qualquer expressão contendo:
+Aceita:
 
-Operadores
-+  -  *  /  **  
-
-Funções
-sen(x)
-cos(x)
-tan(x)
-ln(x)
-log10(x)
-raiz(x)
-conj(x)
+Reais
 
 Complexos
-3+2i
-4-i
--7i
 
-constantes
-x
-a
-beta
+Constantes definidas pelo usuário
 
+Funções
 
-Se você usar uma constante ainda não definida, o programa perguntará seu valor.
+Operadores
+
+Parênteses
 
 Exemplos válidos:
+
 3+2i
 raiz(9)
 (2+3i) * conj(4-i)
@@ -157,81 +179,89 @@ sen(2+3i)
 (3+2i)**(1-i)
 
 
-Cada expressão mostra também sua árvore sintática LISP:
+Sempre mostra a árvore LISP da expressão.
 
-Árvore LISP: (+ 3i (* 2 (conj 4i)))
+3 — Verificação de igualdade
 
-Opção 3 – Verificar se expressões são iguais
+Compara o valor final de duas expressões:
 
-O programa avalia duas expressões e compara os resultados.
-
-Exemplo:
-
-Expr 1: 2+a
-Expr 2: a+2
+Expr1: 2 + a
+Expr2: a + 2
 → Iguais
 
-
-Funciona inclusive com funções e complexos.
-
-Opção 4 – Definir constantes
-
-Cria uma constante e atribui um valor.
-
-Exemplo:
-
-Nome da constante: x
+4 — Definir constante
+Nome: x
 Valor: 3-2i
 
+5 — Mostrar constantes salvas
 
-Depois você pode usar:
+Lista todas formatadas corretamente.
+
+6 — Deletar constantes
+Como os Cálculos São Feitos (Resumo Técnico)
+Séries de Taylor
 
 sen(x)
-x + raiz(9)
-x**2
 
-Opção 5 – Exibir valores salvos
+cos(x)
 
-Mostra todas as constantes já definidas e seus valores formatados.
+e^x
 
-Exemplo:
+Parte do ln(x) via método de Newton
 
-x = 3 - 2i
-y = 1.5
-z = -4i
+Trigonometria Complexa
 
- Como o código funciona (visão geral)
-Implementações matemáticas feitas manualmente
+Implementada pelas identidades:
 
-seno e coss → séries de Taylor
+sin(a+bi) = sin(a)cosh(b) + i cos(a)sinh(b)
+cos(a+bi) = cos(a)cosh(b) - i sin(a)sinh(b)
 
-sinh e cosh → fórmulas exponenciais
+Exponencial Complexa
+e^(a+bi) = e^a (cos(b) + i sin(b))
 
-tan → razão entre sin/cos
+Logaritmo Complexo
+ln(a+bi) = ln(r) + iθ
 
-expo → série de Taylor + Euler para complexos
 
-logn → forma polar ln(r) + iθ
+com:
 
-raizQ → dedução algébrica da raiz quadrada complexa
+r = sqrt(a² + b²)
+θ = atan2(b, a)
 
-arctang → aproximação por séries + ajustes de quadrante
+Raiz Quadrada Complexa
 
-ncomplexo → parser manual para strings complexas
+Derivada da identidade:
+
+√(a+bi) = x + yi
+
+
+onde:
+
+x = sqrt((a + r)/2)
+y = sign(b) * sqrt((r - a)/2)
+
+arctan()
+
+Implementado com:
+
+série de Taylor para |x| ≤ 1
+
+identidades de redução
+
+ajuste de quadrantes (atan2)
 
 Parser
 
-Implementa:
+análise léxica
 
-Tokenização
+análise sintática com precedência
 
-Análise sintática (precedência: (), funções, **, * /, + -)
+árvore Node
 
-Construção da árvore Node
-
-Avaliação recursiva
+avaliação recursiva
 
 Requisitos
 
-Apenas Python padrão.
-Nenhuma biblioteca adicional é necessária.
+Apenas Python padrão
+
+Nenhuma biblioteca externa necessária
