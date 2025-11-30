@@ -50,11 +50,11 @@ Raiz quadrada: raiz()
 
 Conjugado: conj()
 
-seno: sen()
+seno: sen() radiano
 
-cosseno: cos()
+cosseno: cos() radiano
 
-tangente: tan()
+tangente: tan() radiano
 
 logaritmo: ln()
 
