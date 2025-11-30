@@ -17,6 +17,7 @@ def seno(g):
     
     # Números reais (Série de Taylor):
     else:
+        g = g % (2*PI)
         soma = 0
         termo = g
         for n in range(1, TERMOS_TAYLOR):
@@ -37,6 +38,7 @@ def coss(g):
     
     # Números reais (Série de Taylor):
     else:
+        g = g % (2*PI)
         soma = 1
         termo = 1
         for n in range(1, TERMOS_TAYLOR):
@@ -51,8 +53,13 @@ def tang(g):
     # tan(z) = sin(z) / cos(z)
     seno_g = seno(g)
     cos_g = coss(g)
-    if cos_g.real == 0 and cos_g.imag == 0:
-        raise ValueError("Tangente indefinida (divisão por 0)")
+
+    if not isinstance(g, complex):
+        g = g % (2*PI)
+
+    if abs(cos_g.real) < TOLERANCIA_TAYLOR and abs(cos_g.imag) < TOLERANCIA_TAYLOR:
+        raise ValueError("Tangente indefinida para este número")
+    
     return (seno_g/cos_g)
 
 def senoh(g):
