@@ -63,34 +63,64 @@ def cossh(g):
     # cosh(x) = (e^x + e^(-x)) / 2
     return (expo(g) + expo(-g)) / 2
 
-def arctang_taylor(g):
+def arctang_taylor(g): #calcula arctan(g) usando a série de Taylor válida para |x| ≤ 1.
+    #arctan(x) = x - x³/3 + x⁵/5 - x⁷/7 +..  se |g| > 1, usa a identidade: arctan(g) = π/2 - arctan(1/g)
+    #parâmetros globais usados:
+    #TERMOS_TAYLOR: número máximo de termos da expansão
+    #TOLERANCIA_TAYLOR: limite mínimo para interromper a série cedo
+    
+    # se o valor estiver fora do intervalo de convergência da série,
+    # usa a identidade para reduzir para uma região de cálculo melhor.
     if abs(g) > 1:
         return (PI/2) - arctang_taylor(1/g)
     
-    soma = 0
-    termo = g
+    soma = 0 #acumula a soma da série
+    termo = g #primeiro termo da série é x¹
     
     for n in range(0, TERMOS_TAYLOR):
+    #soma o termo atual dividido pelo denominador adequado (1, 3, 5...
         soma += termo / (2*n + 1)
+        #calcula o próximo termo multiplicando por -x²
+        #isso gera automaticamente x³, x⁵, x⁷, alternando sinais.
         termo *= -g*g
+        #se o termo ficou muito pequeno, para para evitar cálculos desnecessários
         if abs(termo) < TOLERANCIA_TAYLOR:
             break
     return soma
 
 def arctang(b, a):
+    #implementa atan2(b, a):
+    #b é o eixo Y   O objetivo é retornar o ângulo correto no plano,considerando o quadrante do ponto (a, b).
+    #a é o eixo X
+    #o objetivo é retornar o ângulo correto no plano,considerando o quadrante do ponto (a, b).
+    #regras:
+    # 1)se a > 0:
+    #atan2(b, a) = arctan(b/a)
+    # 2)se a < 0:
+    #se b ≥ 0 → arctan(b/a) + π
+    #se b <  0 → arctan(b/a) - π
+    #3)se a == 0:
+    #se b >  0 → π/2
+    #se b <  0 → -π/2
+    #se b == 0 → indefinido (0,0 não define ângulo)
+    
+    #quadrante à direita
     if a > 0:
         return arctang_taylor(b/a)
+    #quadrante a esquerda
     elif a < 0:
         if b >= 0:
             return arctang_taylor(b/a) + PI
         else:
             return arctang_taylor(b/a) - PI
+    #eixo vertical (a == 0)
     else:
         if b > 0:
             return PI/2
         elif b < 0:
             return -PI/2
         else:
+            #ponto (0,0) não possui ângulo definido
             raise ValueError("Invalido (divisão por 0)")
 
 def expo(x):
@@ -344,57 +374,70 @@ def tokenize(expr):
             tokens.append(ch)
             i += 1
             continue
-
+         # lista de possíveis nomes que representam a operação de raiz.
+         # # se qualquer um deles aparecer no início da expressão, será convertido para o token padrão "raiz".
         variantes_raiz = ["sqrt", "raizq", "raizQ", "v"]
         matched_raiz = False
+        #verifica se alguma variante de "raiz" aparece na posição atual `i'
         for variante in variantes_raiz:
             if expr.startswith(variante, i):
-                tokens.append("raiz")  # <- normalizer para "raiz"
-                i += len(variante)
+                tokens.append("raiz")  # <- normalizer para "raiz" normaliza qualquer variante encontrada para o token "raiz"
+                i += len(variante)  #avança o índice pelo tamanho da palavra
                 matched_raiz = True
                 break
+        #se encontrou uma variante de raiz, volta para o loop principal
         if matched_raiz:
             continue
-        
+        # reconhecer funções matemáticas listadas em funcs (ex: sin, cos, log)
         matched = False
         for f in funcs:
             if expr.startswith(f, i):
-                tokens.append(f)
-                i += len(f)
+                tokens.append(f) # adiciona a função como token
+                i += len(f) # avança o índice pelo tamanho da função
                 matched = True
                 break
+        #se encontrou uma função, volta para o loop principal
         if matched:
             continue
+        #trata números (inclui decimais, números com 'i' e porcentagens)
         if ch.isdigit() or ch == '.':
             num = ""
+            #constrói o número enquanto houver dígitos ou ponto
             while i < len(expr) and (expr[i].isdigit() or expr[i] == '.'):
                 num += expr[i]
                 i += 1
+            #verifica se o número termina com 'i' (número imaginário
             if i < len(expr) and expr[i] == "i":
                 num += "i"
                 i += 1
+            #verifica se o número possui '%' logo depois (porcentagem)
             if i < len(expr) and expr[i] == "%":
-                base = float(num.replace("i","")) / 100
+                base = float(num.replace("i","")) / 100 #converte para porcentagem
                 if "i" in num:
-                    tokens.append(str(base) + "i")
+                    tokens.append(str(base) + "i") #caso seja número imaginário percentual
                 else:
-                    tokens.append(str(base))
+                    tokens.append(str(base)) #real percentual
                 i += 1
             else:
-                tokens.append(num)
+                tokens.append(num) #numero comum
             continue
+        # Identificadores formados apenas por letras (ex: x, var, abc)
         if ch.isalpha():
             ident = ""
+            # Constrói o identificador enquanto houver letras contínuas
             while i < len(expr) and expr[i].isalpha():
                 ident += expr[i]
                 i += 1
             tokens.append(ident)
             continue
+        #qualquer outro caractere é inválido
         raise ValueError(f"Caractere inválido: {ch}")
+    #retorna a lista de tokens gerados
     return tokens
 
 def nparser(expr):
     tokens = tokenize(expr)
+    #soma e subtração
     def nexpressao():
         node = ntermo()
         while tokens and tokens[0] in ["+","-"]:
@@ -402,6 +445,7 @@ def nparser(expr):
             direita = ntermo()
             node = Node("op", op, node, direita)
         return node
+    # multiplicação e divisão termo
     def ntermo():
         node = npotencia()
         while tokens and tokens[0] in ["*","/"]:
@@ -409,36 +453,44 @@ def nparser(expr):
             direita = npotencia()
             node = Node("op", op, node, direita)
         return node
+    # potencia operador **
     def npotencia():
         node = nfator()
         if tokens and tokens[0] == "**":
             tokens.pop(0)
             node = Node("op","**",node,npotencia())
         return node
+    #números, variáveis, constantes, funções e parênteses
     def nfator():
         if not tokens:
             raise ValueError("Conta incompleta")
         tok = tokens.pop(0)
+        #parênteses
         if tok == "(":
             node = nexpressao()
             if not tokens or tokens.pop(0) != ")":
                 raise ValueError("Parêntese não fechado")
             return node
+        #constantes salvas (pi, e, ou definidas pelo usuário)
         if tok in constantes:
             return Node("num", constantes[tok])
+        #funções reconhecidas
         if tok in ["sen","cos","tan","ln","log10","raiz","conj"]:
             if not tokens or tokens.pop(0) != "(":
                 raise ValueError("Falta parêntese pós função")
             inside = nexpressao()
+            # unario positivo
             if not tokens or tokens.pop(0) != ")":
                 raise ValueError("Parêntese não fechado pós função")
             return Node("func", tok, inside)
+        #unario positivo
         if tok == "+":
             return nfator()
+        #unario negativo transforma em (-1)*expr
         if tok == "-":
             nodo = nfator()
             return Node("op","*", Node("num", complex(-1,0)), nodo)
-        
+        #interpreta como número complexo
         try:
             val = ncomplexo(tok)
             return Node("num", val)
@@ -468,15 +520,17 @@ def evaluate(node, valores_substituidos=None):
         entrada = input(f"Valor da variável {nome}: ")
 
         try:
-            val = ncomplexo(entrada)
+            val = ncomplexo(entrada)  #converte string em número complexo
         except:
             raise ValueError(f"Valor inválido para variável '{nome}'")
         valores_substituidos[nome] = val
         return val, valores_substituidos
     
     if node.tipo == "func":
+        # avalia o argumento da função (ex: em sen(x), avalia 'x')
         arg, valores_substituidos = evaluate(node.esq, valores_substituidos)
-        funcoes = {
+        #tabela de funções reconhecidas
+        funcoes = { 
             "sen": lambda x: seno(x),
             "cos": lambda x: coss(x),
             "tan": lambda x: tang(x),
@@ -487,6 +541,7 @@ def evaluate(node, valores_substituidos=None):
         }
         if node.valor not in funcoes:
             raise ValueError("Função inexistente")
+        # aplica função correspondente
         return funcoes[node.valor](arg), valores_substituidos
     
     # Operadores binários:
@@ -665,7 +720,8 @@ def igual(a,b):
     return False
 
 while True:
-    print("""
+#opções no terminal
+    print(""" 
 1 - Porcentagem
 2 - Expressão aritmética
 3 - Verificação de igualdade
@@ -674,58 +730,71 @@ while True:
 6 - Deletar constantes
 "_" - Sair""")
     op = input("Escolha a opção: ")
-    if op.lower() == "_":
+    if op.lower() == "_":   # atalho para sair da calculadora
         break
     match op:
         case "1":
             entrada = input("Digite o número: ")
             try:
-                resultado = ncomplexo(entrada)
+                resultado = ncomplexo(entrada)   # converte entrada para número complexo
             except Exception:
                 print("Erro: número inválido")
                 continue
             p_input = input("Digite a porcentagem: ")
             try:
-                p = ncomplexo(p_input)
+                p = ncomplexo(p_input)           # porcentagem também aceita números complexos
             except:
                 print("Erro: porcentagem inválida")
                 continue
+
             try:
-                res = resultado * (p / 100)
+                res = resultado * (p / 100)      # cálculo da porcentagem
             except Exception:
                 print("Erro no cálculo")
                 continue
+
             print("Resultado:", format_complex(res))
+
         case "2":
             expr = input("Digite expressão: ")
             try:
-                arv = nparser(expr)
+                arv = nparser(expr)              # monta a árvore sintática da expressão
                 print("Árvore LISP:", mostrar_lisp(arv))
+
+                # evaluate retorna o valor e um dicionário contendo variáveis substituídas
                 res, valores_substituidos = evaluate(arv)
 
                 if valores_substituidos:
+                    # Mostra a árvore com substituições aplicadas (se houver)
                     print("Árvore LISP:", mostrar_lisp_substituido(arv, valores_substituidos))
                 
                 print("Resultado:", format_complex(res))
+
             except ZeroDivisionError:
                 print("Erro: divisão por zero")
             except Exception as e:
                 print("Erro:", e)
+
         case "3":
             e1s = input("Expr 1: ")
             e2s = input("Expr 2: ")
             try:
                 a1 = nparser(e1s)
                 a2 = nparser(e2s)
+
+                # compara se as árvores são estruturalmente iguais
                 print("Árvore 1:", mostrar_lisp(a1))
                 print("Árvore 2:", mostrar_lisp(a2))
-                iguais = igual(a1,a2)
+
+                iguais = igual(a1, a2)
                 print("Iguais" if iguais else "São diferentes")
+
             except ZeroDivisionError:
                 print("Erro: divisão por zero")
             except Exception as e:
                 print("Erro:", e)
-                # Basicamente inutinizavel agora/ Seria bom mudar esse case para Nome da Cosntante
+                # OBS: futuramente esse case pode virar um "comparar constantes"
+
         case "4":
             nome = input("Nome da constante: ").strip()
 
@@ -736,12 +805,14 @@ while True:
             expr = input("Valor: ")
 
             try:
-                arv = nparser(expr)          
-                val, _ = evaluate(arv)          
-                constantes[nome] = val        
+                arv = nparser(expr)
+                val, _ = evaluate(arv)   # calcula valor final da constante
+                constantes[nome] = val   # salva no dicionário permanente
                 print(f"Constante '{nome}' foi definida como {format_complex(val)}")
+
             except Exception as e:
                 print("Erro ao definir constante: ", e)
+
         case "5":
             if not constantes:
                 print("Nenhuma constante salva.")
@@ -749,19 +820,19 @@ while True:
                 print("CONSTANTES SALVAS:")
                 for nome, valor in constantes.items():
                     print(f"{nome} = {format_complex(valor)}")
-        
+
         case "6":
             if not constantes:
                 print("Nenhuma constante salva para deletar.")
                 continue
-                
+
             print("Constantes disponíveis:")
             for nome in constantes.keys():
                 print(f"- {nome}")
-                
+
             nome = input("Nome da constante a deletar: ").strip()
             if nome in constantes:
-                del constantes[nome]
+                del constantes[nome]        # remove do armazenamento
                 print(f"Constante '{nome}' deletada.")
             else:
                 print(f"Constante '{nome}' não encontrada.")
