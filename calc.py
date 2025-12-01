@@ -429,17 +429,35 @@ def tokenize(expr):
                 tokens.append(num) #numero comum
             continue
         # Identificadores formados apenas por letras (ex: x, var, abc)
+
+        # Identificadores (modificado para separar 'i')
         if ch.isalpha():
             ident = ""
-            # Constrói o identificador enquanto houver letras contínuas
             while i < len(expr) and expr[i].isalpha():
                 ident += expr[i]
                 i += 1
-            tokens.append(ident)
+            
+            # Lista de palavras que NÃO podem ser separadas
+            reservadas = ["sen", "cos", "tan", "ln", "log10", "raiz", "conj", "pi", "e", "sqrt"]
+            
+            # Lógica nova:
+            # 1. Se for palavra reservada ou for apenas "i", adiciona normal
+            if ident in reservadas or ident == "i":
+                tokens.append(ident)
+            
+            # 2. Se termina com "i" (ex: "bi", "ai", "zwi"), separa em [var, *, i]
+            elif ident.endswith("i"):
+                nome_var = ident[:-1] # Pega tudo menos o 'i' final
+                tokens.append(nome_var)
+                tokens.append("*")    # Adiciona multiplicação invisível
+                tokens.append("i")
+            
+            # 3. Se for variável normal (ex: "x", "beta")
+            else:
+                tokens.append(ident)
             continue
-        #qualquer outro caractere é inválido
+            
         raise ValueError(f"Caractere inválido: {ch}")
-    #retorna a lista de tokens gerados
     return tokens
 
 def nparser(expr):
