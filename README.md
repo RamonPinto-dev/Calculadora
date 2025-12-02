@@ -183,11 +183,11 @@ Sempre mostra a árvore LISP da expressão.
 
 3 — Verificação de igualdade
 
-Compara o valor final de duas expressões:
+Compara o valor LISP de duas expressões:
 
 Expr1: 2 + a
 Expr2: a + 2
-→ Iguais
+→ São Diferentes
 
 4 — Definir constante
 Nome: x
