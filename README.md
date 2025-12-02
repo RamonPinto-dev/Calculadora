@@ -187,7 +187,7 @@ Compara o valor LISP de duas expressões:
 
 Expr1: 2 + a
 Expr2: a + 2
-→Diferentes
+→São Diferentes
 
 4 — Definir constante
 Nome: x
